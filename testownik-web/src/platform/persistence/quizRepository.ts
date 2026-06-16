@@ -4,7 +4,7 @@ import type { QuizPackage } from '@/domain/quizTypes'
 export async function saveQuiz(quiz: QuizPackage): Promise<void> {
   await transaction(['quizPackages'], 'readwrite', (tx) => {
     const store = objectStore(tx, 'quizPackages')
-    return store.put({ ...quiz })
+    return store.put(JSON.parse(JSON.stringify(quiz)))
   })
 }
 
