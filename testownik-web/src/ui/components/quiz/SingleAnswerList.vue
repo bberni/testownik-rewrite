@@ -49,12 +49,15 @@ function isSelected(id: number): boolean {
 }
 
 function answerClasses(answer: SingleQuestionAnswer) {
-  if (props.phase !== 'revealed') return {}
+  const checked = isSelected(answer.id)
+  if (props.phase !== 'revealed') {
+    return { 'single-answer--checked': checked }
+  }
   return {
     'single-answer--correct': answer.isCorrect,
-    'single-answer--wrong': isSelected(answer.id) && !answer.isCorrect,
-    'single-answer--missed': !isSelected(answer.id) && answer.isCorrect,
-    'single-answer--checked': isSelected(answer.id),
+    'single-answer--wrong': checked && !answer.isCorrect,
+    'single-answer--missed': !checked && answer.isCorrect,
+    'single-answer--checked': checked,
   }
 }
 </script>

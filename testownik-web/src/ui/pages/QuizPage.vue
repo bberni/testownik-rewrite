@@ -282,10 +282,11 @@ function nextQuestion() {
 }
 
 function onKeyDown(event: KeyboardEvent) {
+  const target = event.target
   if (
-    event.target instanceof HTMLInputElement ||
-    event.target instanceof HTMLTextAreaElement ||
-    event.target instanceof HTMLSelectElement
+    (target instanceof HTMLInputElement && target.type !== 'checkbox') ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
   ) {
     return
   }
