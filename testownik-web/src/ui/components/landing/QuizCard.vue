@@ -13,7 +13,8 @@
           <span class="quiz-card__stat-label">Poprawne</span>
           <ProgressBar
             :progress="item.correctRatio"
-            :color="progressColor"
+            color="var(--primary-color)"
+            color2="var(--red-color)"
           />
           <span class="quiz-card__stat-value">
             {{ Math.round(item.correctRatio * 100) }}%
@@ -85,11 +86,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import ProgressBar from '@/ui/components/shared/ProgressBar.vue'
 import type { LibraryItem } from '@/ui/stores/quizLibrary'
 
-const props = defineProps<{
+defineProps<{
   item: LibraryItem
 }>()
 
@@ -98,10 +98,6 @@ defineEmits<{
   startNew: [quizId: string]
   delete: [quizId: string]
 }>()
-
-const progressColor = computed(() =>
-  props.item.correctRatio >= 0.7 ? 'var(--primary-color)' : 'var(--yellow-color)',
-)
 </script>
 
 <style scoped>

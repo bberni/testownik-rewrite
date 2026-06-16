@@ -13,13 +13,27 @@ import { computed } from 'vue'
 const props = defineProps<{
   progress: number
   color?: string
+  color2?: string
 }>()
 
-const fillStyle = computed(() => ({
-  width: `${Math.min(Math.max(props.progress, 0), 1) * 100}%`,
-  backgroundColor: props.color ?? 'var(--primary-color)',
-  transition: 'width 0.3s ease, background-color 0.3s ease',
-}))
+const fillStyle = computed(() => {
+  const clamped = Math.min(Math.max(props.progress, 0), 1) * 100
+
+  if (props.color2) {
+    const pct = `${clamped}%`
+    return {
+      width: '100%',
+      background: `linear-gradient(to right, ${props.color ?? 'var(--primary-color)'} 0%, ${props.color ?? 'var(--primary-color)'} ${pct}, ${props.color2} ${pct})`,
+      transition: 'background 0.3s ease',
+    }
+  }
+
+  return {
+    width: `${clamped}%`,
+    backgroundColor: props.color ?? 'var(--primary-color)',
+    transition: 'width 0.3s ease, background-color 0.3s ease',
+  }
+})
 </script>
 
 <style scoped>

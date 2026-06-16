@@ -4,7 +4,8 @@
       <span class="stats__label">Poprawne</span>
       <ProgressBar
         :progress="progress.correctRatio"
-        :color="progress.correctRatio >= 0.7 ? 'var(--primary-color)' : 'var(--yellow-color)'"
+        color="var(--primary-color)"
+        color2="var(--red-color)"
       />
       <span class="stats__numbers">{{ correctAnswers }} / {{ badAnswers }}</span>
     </div>
