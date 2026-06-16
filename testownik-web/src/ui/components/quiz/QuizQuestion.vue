@@ -25,8 +25,9 @@
               'question-body__select--filled': !!selectValues[part.selectId],
               'question-body__select--correct': isCorrectSelect(part.selectId),
               'question-body__select--wrong': isWrongSelect(part.selectId),
+              'question-body__select--disabled': phase === 'revealed',
             }"
-            @click="$emit('openSelect', part.selectId)"
+            @click="phase !== 'revealed' && $emit('openSelect', part.selectId)"
           >
             {{ selectValues[part.selectId] || `(${part.selectId})` }}
           </span>
@@ -40,12 +41,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Question, SelectPlaceholder } from '@/domain/quizTypes'
+import type { QuizPhase } from '@/ui/stores/quizSession'
 
 const props = defineProps<{
   question: Question
   imgSrc: string | null
   selectValues: Record<number, string>
   selectResults?: { selectId: number; isCorrect: boolean }[]
+  phase: QuizPhase
 }>()
 
 defineEmits<{

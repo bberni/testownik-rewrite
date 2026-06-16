@@ -16,40 +16,19 @@
 
       <template v-if="phase === 'finished'">
         <div class="quiz-page__finished">
-          <div class="quiz-page__finished-icon">
-            <svg
-              width="64"
-              height="64"
-              viewBox="0 0 24 24"
-              fill="var(--primary-color)"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-            </svg>
-          </div>
           <p class="quiz-page__finished-text">
             Koniec quizu!
           </p>
-          <p class="quiz-page__finished-sub">
-            Czas: {{ formattedFinishedTime }} &middot;
-            Poprawne: {{ correctAnswers }} &middot;
-            Błędne: {{ badAnswers }} &middot;
-            Nauczone: {{ learnedQuestions }}
-          </p>
-          <button
-            class="quiz-page__finished-btn"
-            @click="goHome"
-          >
-            Powrót
-          </button>
         </div>
       </template>
 
-      <template v-else-if="currentQuestion">
+      <template v-if="phase !== 'finished' && currentQuestion">
         <QuizQuestion
           :question="currentQuestion"
           :img-src="getQuestionImgUrl()"
           :select-values="selectValues"
           :select-results="revealedSelectResults"
+          :phase="phase"
           @open-select="openSelectModal"
         />
 
@@ -112,6 +91,9 @@
         :current-tag="currentTag"
         :current-reoccurrences="currentReoccurrences"
         :time="time"
+        :correct-answers="correctAnswers"
+        :bad-answers="badAnswers"
+        :learned-questions="learnedQuestions"
         @open-settings="showSettings = true"
         @open-info="showInfo = true"
         @save-exit="showSaveExit = true"
@@ -162,6 +144,15 @@
         </div>
       </div>
     </Modal>
+
+    <FinishQuizModal
+      :open="phase === 'finished'"
+      :time="time"
+      :correct-answers="correctAnswers"
+      :bad-answers="badAnswers"
+      :learned-questions="learnedQuestions"
+      @close="goHome"
+    />
   </div>
 </template>
 
@@ -172,7 +163,6 @@ import { storeToRefs } from 'pinia'
 import { useQuizSessionStore } from '@/ui/stores/quizSession'
 import { useQuizLibraryStore } from '@/ui/stores/quizLibrary'
 import { useAssetUrls } from '@/ui/composables/useAssetUrls'
-import { formatDuration } from '@/domain/saveJsonCompat'
 import type { SelectQuestionAnswer, SelectOption } from '@/domain/quizTypes'
 import QuizQuestion from '@/ui/components/quiz/QuizQuestion.vue'
 import SingleAnswerList from '@/ui/components/quiz/SingleAnswerList.vue'
@@ -181,6 +171,7 @@ import SelectOptionsModal from '@/ui/components/quiz/SelectOptionsModal.vue'
 import Modal from '@/ui/components/shared/Modal.vue'
 import SettingsModal from '@/ui/components/landing/SettingsModal.vue'
 import InfoModal from '@/ui/components/landing/InfoModal.vue'
+import FinishQuizModal from '@/ui/components/quiz/FinishQuizModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -211,8 +202,6 @@ const time = computed(() => store.session?.time ?? 0)
 const correctAnswers = computed(() => store.session?.numberOfCorrectAnswers ?? 0)
 const badAnswers = computed(() => store.session?.numberOfBadAnswers ?? 0)
 const learnedQuestions = computed(() => store.session?.numberOfLearnedQuestions ?? 0)
-
-const formattedFinishedTime = computed(() => formatDuration(time.value))
 
 const { load: loadAssets, getUrl: getAssetUrl } = useAssetUrls(quizId.value)
 
@@ -255,6 +244,7 @@ async function init() {
 onMounted(init)
 
 onUnmounted(() => {
+  store.stopTimer()
   store.saveSession()
 })
 
@@ -299,6 +289,7 @@ function onKeyDown(event: KeyboardEvent) {
   }
 
   if (event.key === ' ') {
+    if (showSettings.value || showInfo.value || showSaveExit.value) return
     event.preventDefault()
     if (phase.value === 'answering') {
       checkAnswer()

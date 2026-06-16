@@ -23,6 +23,14 @@ import {
 
 export type QuizPhase = 'answering' | 'revealed' | 'finished'
 
+function shuffleSingleAnswers(
+  question: Question | null,
+): SingleQuestionAnswer[] {
+  if (question?.type !== 'single') return []
+  const answerList = question.answers as SingleQuestionAnswer[]
+  return [...answerList].sort(() => Math.random() - 0.5)
+}
+
 export const useQuizSessionStore = defineStore('quizSession', {
   state: () => ({
     quizId: '',
@@ -37,6 +45,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
     selectedIds: [] as number[],
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     selectSelections: {} as Record<number, number>,
+    shuffledSingleAnswers: [] as SingleQuestionAnswer[],
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     phase: 'answering' as QuizPhase,
@@ -78,8 +87,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
       if (state.currentQuestion?.type !== 'single') {
         return []
       }
-      const answers = state.currentQuestion.answers as SingleQuestionAnswer[]
-      return [...answers].sort(() => Math.random() - 0.5)
+      return state.shuffledSingleAnswers
     },
 
     selectAnswers(state): SelectQuestionAnswer[] {
@@ -97,8 +105,9 @@ export const useQuizSessionStore = defineStore('quizSession', {
 
       const quiz = await getQuiz(quizId)
       if (!quiz) throw new Error('Quiz nie został znaleziony.')
+      const quizQuestions: Question[] = quiz.questions
 
-      this.questions = quiz.questions
+      this.questions = quizQuestions
       this.quizName = quiz.name
 
       const settings = useSettingsStore()
@@ -107,34 +116,28 @@ export const useQuizSessionStore = defineStore('quizSession', {
       if (mode === 'continue') {
         const existing = await getLatestSession(quizId)
         if (existing?.completedAt !== null) {
-          // No valid session to continue, start fresh
-          const created = createQuizSession({
-            questions: quiz.questions,
-            reoccurrencesOnStart: settings.reoccurrencesOnStart,
-          })
-          session = {
-            schemaVersion: 1,
-            id: crypto.randomUUID(),
-            quizId,
-            startedAt: Date.now(),
-            updatedAt: Date.now(),
-            completedAt: null,
-            numberOfLearnedQuestions: created.numberOfLearnedQuestions,
-            numberOfCorrectAnswers: created.numberOfCorrectAnswers,
-            numberOfBadAnswers: created.numberOfBadAnswers,
-            time: created.time,
-            reoccurrences: created.reoccurrences,
-          }
+          const created = createNewSession()
+          await saveSession(created)
+          session = created
         } else {
           session = existing
         }
       } else {
-        // Start new session
+        const created = createNewSession()
+        await saveSession(created)
+        session = created
+      }
+
+      this.session = session
+      this.pickNext()
+      this.startTimer()
+
+      function createNewSession(): QuizSession {
         const created = createQuizSession({
-          questions: quiz.questions,
+          questions: quizQuestions,
           reoccurrencesOnStart: settings.reoccurrencesOnStart,
         })
-        session = {
+        return {
           schemaVersion: 1,
           id: crypto.randomUUID(),
           quizId,
@@ -147,12 +150,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
           time: created.time,
           reoccurrences: created.reoccurrences,
         }
-        await saveSession(session)
       }
-
-      this.session = session
-      this.pickNext()
-      this.startTimer()
     },
 
     pickNext() {
@@ -174,6 +172,7 @@ export const useQuizSessionStore = defineStore('quizSession', {
         this.questions.find((q) => q.tag === tag) ?? null
       this.selectedIds = []
       this.selectSelections = {}
+      this.shuffledSingleAnswers = shuffleSingleAnswers(this.currentQuestion)
       this.phase = 'answering'
     },
 

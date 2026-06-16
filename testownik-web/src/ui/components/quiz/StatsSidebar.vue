@@ -6,10 +6,12 @@
         :progress="progress.correctRatio"
         :color="progress.correctRatio >= 0.7 ? 'var(--primary-color)' : 'var(--yellow-color)'"
       />
+      <span class="stats__numbers">{{ correctAnswers }} / {{ badAnswers }}</span>
     </div>
     <div class="stats__item">
       <span class="stats__label">Nauczone</span>
       <ProgressBar :progress="progress.learnedRatio" />
+      <span class="stats__numbers">{{ learnedQuestions }} / {{ progress.totalQuestions }}</span>
     </div>
     <div class="stats__item">
       <span class="stats__label">Liczba pytań</span>
@@ -98,6 +100,9 @@ const props = defineProps<{
   currentTag: string | null
   currentReoccurrences: number
   time: number
+  correctAnswers: number
+  badAnswers: number
+  learnedQuestions: number
 }>()
 
 defineEmits<{
@@ -145,6 +150,12 @@ const formattedTime = computed(() => formatDuration(props.time))
   font-size: 0.9rem;
   color: var(--primary-text);
   font-weight: 600;
+}
+
+.stats__numbers {
+  font-size: 0.75rem;
+  color: var(--distant-text);
+  margin-top: 2px;
 }
 
 .stats__separator {
