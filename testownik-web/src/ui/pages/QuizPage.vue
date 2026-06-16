@@ -97,6 +97,7 @@
         @open-settings="showSettings = true"
         @open-info="showInfo = true"
         @save-exit="showSaveExit = true"
+        @export-save="store.exportSaveJson"
       />
     </aside>
 
@@ -198,7 +199,7 @@ const {
   selectAnswers,
 } = storeToRefs(store)
 
-const time = computed(() => store.session?.time ?? 0)
+const time = computed(() => store.time)
 const correctAnswers = computed(() => store.session?.numberOfCorrectAnswers ?? 0)
 const badAnswers = computed(() => store.session?.numberOfBadAnswers ?? 0)
 const learnedQuestions = computed(() => store.session?.numberOfLearnedQuestions ?? 0)
@@ -340,8 +341,8 @@ function goHome() {
   router.replace('/')
 }
 
-function saveAndExit() {
-  store.saveSession()
+async function saveAndExit() {
+  await store.saveSession()
   showSaveExit.value = false
   goHome()
 }

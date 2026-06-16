@@ -5,11 +5,12 @@ import {
   saveQuiz,
   getQuizByFingerprint,
 } from '@/platform/persistence/quizRepository'
-import { getLatestSession } from '@/platform/persistence/sessionRepository'
+import { getLatestSession, saveSession } from '@/platform/persistence/sessionRepository'
 import { saveAssets } from '@/platform/assets/assetRepository'
 import { listRecents, upsertRecent } from '@/platform/persistence/recentRepository'
-import type { QuizPackage, StoredAssetRef } from '@/domain/quizTypes'
+import type { QuizPackage, StoredAssetRef, QuizSession } from '@/domain/quizTypes'
 import type { ImportResult } from '@/platform/files/importPipeline'
+import { deserializeSaveJson } from '@/domain/saveJsonCompat'
 
 export interface LibraryItem {
   quiz: QuizPackage
@@ -153,6 +154,92 @@ export const useQuizLibraryStore = defineStore('quizLibrary', {
       const item = this.items.find((i) => i.quiz.id === quizId)
       if (item) {
         item.lastOpenedAt = Date.now()
+      }
+    },
+
+    async matchAndImportSaveJson(
+      file: File,
+    ): Promise<{ quizId: string; quizName: string; matchPercent: number }> {
+      const text = await file.text()
+      const data = deserializeSaveJson(text)
+
+      const saveTags = new Set(data.reoccurrences.map((r) => r.tag))
+      if (saveTags.size === 0) {
+        throw new Error('Plik save.json nie zawiera tagów pytań.')
+      }
+
+      await this.loadAll()
+      let bestMatch: {
+        quiz: QuizPackage
+        matchCount: number
+        matchPercent: number
+      } | null = null
+
+      for (const item of this.items) {
+        const quizTags = new Set(item.quiz.questions.map((q) => q.tag))
+        let matchCount = 0
+        for (const tag of saveTags) {
+          if (quizTags.has(tag)) matchCount++
+        }
+        if (matchCount === 0) continue
+        const matchPercent = Math.round((matchCount / saveTags.size) * 100)
+        if (!bestMatch || matchCount > bestMatch.matchCount) {
+          bestMatch = { quiz: item.quiz, matchCount, matchPercent }
+        }
+      }
+
+      if (!bestMatch) {
+        throw new Error(
+          'Nie znaleziono quizu pasującego do pliku save.json. Najpierw zaimportuj odpowiedni quiz.',
+        )
+      }
+
+      if (bestMatch.matchPercent < 50) {
+        throw new Error(
+          `Znaleziono niskie dopasowanie (${bestMatch.matchPercent}%) do quizu "${bestMatch.quiz.name}". Sprawdź, czy to właściwy plik save.json.`,
+        )
+      }
+
+      const existingSession = await getLatestSession(bestMatch.quiz.id)
+      if (existingSession?.completedAt === null) {
+        throw new Error(
+          `Quiz "${bestMatch.quiz.name}" ma już aktywną sesję. Zakończ lub usuń bieżącą sesję przed zaimportowaniem save.json.`,
+        )
+      }
+
+      const now = Date.now()
+      const session: QuizSession = {
+        schemaVersion: 1,
+        id: crypto.randomUUID(),
+        quizId: bestMatch.quiz.id,
+        startedAt: now,
+        updatedAt: now,
+        completedAt: null,
+        numberOfLearnedQuestions: data.numberOfLearnedQuestions,
+        numberOfCorrectAnswers: data.numberOfCorrectAnswers,
+        numberOfBadAnswers: data.numberOfBadAnswers,
+        time: data.time,
+        reoccurrences: data.reoccurrences,
+      }
+
+      await saveSession(session)
+
+      const item = this.items.find((i) => i.quiz.id === bestMatch.quiz.id)
+      if (item) {
+        item.hasSession = true
+        item.isComplete = session.completedAt !== null
+        const total = session.numberOfCorrectAnswers + session.numberOfBadAnswers
+        item.correctRatio = total > 0 ? session.numberOfCorrectAnswers / total : 0
+        item.learnedRatio =
+          bestMatch.quiz.questionCount > 0
+            ? session.numberOfLearnedQuestions / bestMatch.quiz.questionCount
+            : 0
+      }
+
+      return {
+        quizId: bestMatch.quiz.id,
+        quizName: bestMatch.quiz.name,
+        matchPercent: bestMatch.matchPercent,
       }
     },
   },
