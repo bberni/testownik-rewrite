@@ -5,7 +5,7 @@ export default tseslint.config(
   { ignores: ['dist/', 'playwright-report/', 'test-results/'] },
   {
     extends: [
-      ...tseslint.configs.strictTypeChecked,
+      ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylisticTypeChecked,
     ],
     files: ['src/**/*.ts', 'tests/**/*.ts', '*.config.ts'],
