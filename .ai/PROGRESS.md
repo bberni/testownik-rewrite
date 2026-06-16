@@ -219,6 +219,40 @@ Add a new entry with:
 - `formatDuration` still in `saveJsonCompat.ts` — should be extracted to `domain/duration.ts`.
 - Keyboard handler missing `Numpad1-9` and `Backquote` key codes.
 
-**Recommended next step:** Phase 7 — Autosave, Restore, And Export (autosave answers/timer, restore session, start new, export/import save.json).
+**Recommended next step:** Phase 8 — Static Hosting And Optional PWA.
 
-(End of file - total 239 lines)
+---
+
+## 2026-06-16 — Phase 7: Autosave, Restore, And Export
+
+**Scope:**
+- Added periodic timer autosave (every 30s) + visibility change listener (save when tab hidden).
+- Added `exportSaveJson` action downloading `save.json` via Blob download (uses `platform/browser/download.ts`).
+- Added `matchAndImportSaveJson` action in quizLibrary store — parses `save.json`, matches reoccurrence tags to quiz question tags, creates new session, guards against overwriting active sessions, shows error banners on mismatch.
+- Added import save.json button in LandingPage (hidden file input, only visible when quizzes exist).
+- Fixed timer race condition: decoupled wall-clock tracking (`timerStartedAt`, `timerTick`, `flushTime`) from session mutations. Timer no longer writes to `session.time` — instead, elapsed time is computed via getter and flushed to session.time only on save/stop.
+- Fixed `saveAndExit` not awaiting save before navigation.
+- Fixed `saveSession` swallowing errors: now accepts `{ silent?: boolean }` — autosave calls use `{ silent: true }`, user-initiated saves log errors to console.
+- Extracted DOM APIs: `triggerDownload` to `platform/browser/download.ts`, `addVisibilityListener` to `platform/browser/visibility.ts`.
+- Fixed CSS: `position: relative` on `.landing__save-import` label.
+
+**Tests and checks run:**
+- `pnpm typecheck` — passes (0 errors)
+- `pnpm lint` — passes (0 errors)
+- `pnpm test:unit` — 109 tests pass
+- `pnpm test:components` — 15 tests pass
+- `pnpm test:integration` — 28 tests pass
+- `pnpm build` — production build succeeds
+- Total: 152 tests
+
+**Code review result:** PASS WITH FIXES — 4 majors + 4 minors found, all resolved pre-merge (silent save failures, un-awaited saveAndExit, timer race condition, DOM APIs in store, position relative, void return type, session overwrite guard).
+
+**Known follow-ups:**
+- No unit tests for `matchAndImportSaveJson` tag-matching logic.
+- Timer time accuracy limited to ~1s drift between ticks (cosmetic only).
+- Import save.json does not handle multiple quizzes with equal match scores (takes first best).
+- `flushTime()` called twice in `finishQuiz` path (once in `stopTimer`, once in `saveSession`) — second call is a no-op since `timerStartedAt` is already null.
+
+**Recommended next step:** Phase 8 — Static Hosting And Optional PWA (configure Vite base, hash routing, deployment workflow, PWA evaluation).
+
+(End of file - total 276 lines)
