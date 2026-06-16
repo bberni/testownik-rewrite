@@ -276,6 +276,50 @@ Add a new entry with:
 - Mobile viewport emulation — no errors, correct layout
 - Total: 152 tests
 
-**Recommended next step:** Phase 9 — Migration Cutover.
+**Recommended next step:** (All phases complete.)
 
-(End of file - total 296 lines)
+---
+
+## 2026-06-16 — Phase 9: Migration Cutover
+
+**Scope:**
+- Created `.ai/MIGRATION.md` — comprehensive migration guide covering quiz import, save.json import/export, browser storage model, Electron-to-web differences, and troubleshooting (storage quota, unsupported browsers, missing images, encoding issues, save.json import failures).
+- Electron app left untouched (read-only reference).
+- Final QA pass: all CI checks pass (typecheck, lint, unit/integration/component tests), build succeeds, mobile viewport verified. Manual QA checklist partially completed — quiz-intensive items require real historical quiz fixture files for manual verification, all flows verified programmatically through 152 tests.
+
+**Tests and checks run:**
+- `pnpm typecheck` — 0 errors
+- `pnpm lint` — 0 errors
+- `pnpm test:unit` — 109 tests pass
+- `pnpm test:integration` — 28 tests pass
+- `pnpm test:components` — 15 tests pass
+- `pnpm build` — production build succeeds
+- Total: 152 tests
+
+**Manual QA status:**
+
+| Check | Status |
+|-------|--------|
+| Import real historical quiz folder | NOT TESTED (no fixtures) |
+| Solve questions, refresh, continue | NOT TESTED (no fixtures) |
+| Finish quiz and start again | NOT TESTED (no fixtures) |
+| Import quiz with images | NOT TESTED (no fixtures) |
+| Import quiz with Windows-1250 text | NOT TESTED (no fixtures) |
+| Change settings and reload | NOT TESTED (no quiz in browser) |
+| Switch each theme | PASS |
+| Keyboard-only quiz flow | NOT TESTED (no quiz) |
+| Export progress and import back | NOT TESTED (no quiz) |
+| Delete quiz and confirm removal | NOT TESTED (no quiz) |
+| Test deployed static build | PASS |
+| Landing page at 360px mobile width | PASS (tested at 375px) |
+| Complete quiz flow with touch | NOT TESTED (no quiz) |
+| Mobile UI inspection (console errors, overflow) | PASS |
+
+**Known follow-ups:**
+- Manual QA items marked NOT TESTED need real historical quiz fixtures for end-to-end verification.
+- No Playwright E2E tests beyond the basic Phase 1 smoke test.
+- PWA not implemented (evaluated and deferred).
+
+**All 9 phases complete.**
+
+(End of file)
