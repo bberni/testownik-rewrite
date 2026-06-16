@@ -109,7 +109,7 @@ export async function runImportPipeline(
       const data = await file.getData()
       assets.push({
         relativePath: ref,
-        blob: new Blob([data], {
+        blob: new Blob([data as Uint8Array<ArrayBuffer>], {
           type: guessMimeType(ref),
         }),
         mimeType: guessMimeType(ref),
