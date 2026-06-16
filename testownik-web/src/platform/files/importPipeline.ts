@@ -103,7 +103,7 @@ export async function runImportPipeline(
 
   for (const ref of imageRefs) {
     const file = allFiles.find(
-      (f) => f.path.endsWith(ref) || f.path.endsWith(`/${ref}`),
+      (f) => f.path.endsWith(`/${ref}`),
     )
     if (file) {
       const data = await file.getData()

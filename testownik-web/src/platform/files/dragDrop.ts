@@ -1,7 +1,14 @@
 import type { VirtualDirectory } from './importedFileTree'
 
 export function isDirectoryDragSupported(): boolean {
-  return 'DataTransferItem' in globalThis
+  return (
+    'DataTransferItem' in globalThis &&
+    typeof (
+      DataTransferItem.prototype as {
+        webkitGetAsEntry?: unknown
+      }
+    ).webkitGetAsEntry === 'function'
+  )
 }
 
 async function readEntry(

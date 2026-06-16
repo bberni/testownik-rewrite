@@ -13,8 +13,6 @@ export function importViaFileInput(
   input: HTMLInputElement,
 ): Promise<VirtualDirectory | null> {
   return new Promise((resolve) => {
-    const originalValue = input.value
-
     input.addEventListener(
       'change',
       () => {
@@ -38,11 +36,7 @@ export function importViaFileInput(
       { once: true },
     )
 
-    if (input.value !== originalValue) {
-      input.click()
-    } else {
-      input.click()
-    }
+    input.click()
   })
 }
 
