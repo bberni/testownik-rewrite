@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         working-directory: testownik-web
         run: |
-          pnpm approve-builds esbuild
+          pnpm approve-builds --all
           pnpm install --frozen-lockfile
       - name: Typecheck
         working-directory: testownik-web
