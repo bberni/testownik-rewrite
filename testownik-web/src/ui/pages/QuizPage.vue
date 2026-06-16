@@ -39,6 +39,7 @@
           :phase="phase"
           :correct-ids="revealedCorrectIds"
           :get-img-url="getAssetUrl"
+          @toggle="store.toggleAnswer"
         />
       </template>
 
