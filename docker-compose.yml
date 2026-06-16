@@ -2,7 +2,7 @@ services:
   dev:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
       target: dev
     ports:
       - '5173:5173'
@@ -15,7 +15,7 @@ services:
   prod:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
       target: prod
     ports:
       - '8080:80'
