@@ -322,4 +322,33 @@ Add a new entry with:
 
 **All 9 phases complete.**
 
+---
+
+## 2026-06-16 — Phase 10: CI/CD And GitHub Pages Deployment Verification
+
+**Scope:**
+- Verified GitHub Pages deploy workflow passes end-to-end: typecheck → lint → unit tests (109) → integration tests (28) → component tests (15) → build → deploy.
+- Fixed CI blockers: pnpm v11 `allowBuilds: { esbuild: true }` in `pnpm-workspace.yaml`, unused `computed` import in `SingleAnswerList.vue`.
+- Verified deployed URL (`https://bberni.github.io/testownik-rewrite/`): page loads, hash routing works (`/#/quiz/test123` resolves), 0 console errors at both desktop (1280×720) and mobile (375×812) viewports.
+- CI regression guard confirmed: previous runs failed on typecheck/lint errors, preventing deployment.
+- Workflow uses `pnpm/action-setup` with `cache: pnpm` for fast dependency resolution.
+- Lockfile drift prevented by `--frozen-lockfile`.
+
+**Checks verified:**
+| Criterion | Status |
+|---|---|
+| CI green (all steps pass on push to main) | PASS |
+| Deploy succeeds (actions/deploy-pages completes) | PASS |
+| Hash routing works on deployed domain | PASS |
+| No console errors (desktop + mobile) | PASS |
+| CI blocks deploy on failure | PASS (verified by 4 failed runs) |
+| Mobile deploy (375px viewport) | PASS |
+
+**Known follow-ups:**
+- Node.js 20 deprecation warning in CI — actions should be upgraded to v5 where available before September 2026.
+- No content-type sniffing override — GitHub Pages serves `.css`/`.js` assets with correct MIME types by default.
+- No custom 404 page (hash routing doesn't need one).
+
+**All 10 phases complete.**
+
 (End of file)
