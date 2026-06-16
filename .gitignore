@@ -1,0 +1,30 @@
+testownik-electron/
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Generated
+pnpm-workspace.yaml
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Playwright
+.playwright-cli/

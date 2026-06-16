@@ -1,0 +1,89 @@
+:root,
+[data-theme='dark'] {
+  --green-color: #39b54a;
+  --yellow-color: rgb(255, 219, 58);
+  --red-color: rgb(241, 81, 81);
+  --primary-color: #39b54a;
+  --primary-color-lighter: #4dc65d;
+  --primary-color-lightest: #69e07a;
+
+  --primary-text: rgba(255, 255, 255, 0.75);
+  --secondary-text: rgba(255, 255, 255, 0.4);
+  --distant-text: rgba(255, 255, 255, 0.2);
+
+  --background: #21252b;
+  --background-2: #1b1e23;
+  --background-3: #181a1f;
+
+  --max-color: 0, 0, 0;
+  --contrast-color: 255, 255, 255;
+
+  --main-window-background: var(--background);
+  --sidebar-background: var(--background-3);
+  --answer-single-type-background: var(--background-2);
+  --answer-single-type-checked-border-color: rgba(255, 255, 255, 0.15);
+  --drag-border-color: rgba(255, 255, 255, 0.1);
+  --drag-background: rgba(255, 255, 255, 0.02);
+  --drag-over-background: rgba(255, 255, 255, 0.04);
+  --modal-background: var(--background);
+  --modal-mask: var(--background-3);
+  --v-select-list-background: var(--background-2);
+  --v-select-list-hover: var(--background-3);
+}
+
+[data-theme='light'] {
+  --primary-text: rgba(0, 0, 0, 0.75);
+  --secondary-text: rgba(0, 0, 0, 0.4);
+  --distant-text: rgba(0, 0, 0, 0.2);
+
+  --background: #eeeeee;
+  --background-2: #fafafa;
+  --background-3: #ffffff;
+
+  --max-color: 255, 255, 255;
+  --contrast-color: 0, 0, 0;
+
+  --main-window-background: var(--background-2);
+  --sidebar-background: var(--background);
+  --answer-single-type-background: var(--background-3);
+  --answer-single-type-checked-border-color: rgba(0, 0, 0, 0.25);
+  --drag-border-color: rgba(0, 0, 0, 0.1);
+  --drag-background: rgba(0, 0, 0, 0.02);
+  --drag-over-background: rgba(0, 0, 0, 0.05);
+  --modal-background: var(--background-2);
+  --modal-mask: var(--background);
+  --v-select-list-background: var(--background-3);
+  --v-select-list-hover: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='legacy'] {
+  --green-color: rgb(0, 255, 0);
+  --yellow-color: rgb(255, 255, 0);
+  --red-color: rgb(255, 0, 0);
+  --primary-color: #00ff00;
+  --primary-color-lighter: #0aff0a;
+  --primary-color-lightest: #1aff1a;
+
+  --primary-text: rgba(255, 255, 255, 1);
+  --secondary-text: rgba(255, 255, 255, 0.6);
+  --distant-text: rgba(255, 255, 255, 0.4);
+
+  --background: #075098;
+  --background-2: #064c91;
+  --background-3: #06488a;
+
+  --max-color: 0, 0, 0;
+  --contrast-color: 255, 255, 255;
+
+  --main-window-background: var(--background);
+  --sidebar-background: var(--background-3);
+  --answer-single-type-background: #ffffff;
+  --answer-single-type-checked-border-color: rgba(255, 255, 255, 0.15);
+  --drag-border-color: rgba(255, 255, 255, 0.1);
+  --drag-background: rgba(255, 255, 255, 0.02);
+  --drag-over-background: rgba(255, 255, 255, 0.04);
+  --modal-background: var(--background);
+  --modal-mask: var(--background-3);
+  --v-select-list-background: var(--background-2);
+  --v-select-list-hover: var(--background-3);
+}
