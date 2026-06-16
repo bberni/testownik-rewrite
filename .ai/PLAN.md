@@ -473,6 +473,45 @@ Acceptance criteria:
 | User docs | User can import and continue quizzes without Electron knowledge. |
 | Behavior parity | Required product features are covered by automated or manual tests. |
 
+### Phase 10: CI/CD And GitHub Pages Deployment Verification
+
+Objectives:
+
+| Task | Output |
+|---|---|
+| CI pipeline passes | Typecheck, lint, all test suites, and build succeed in GitHub Actions. |
+| Pages deploy succeeds | Artifact uploaded and deployed without errors. |
+| Deployed URL verified | Live site loads, hash routing works, no console errors. |
+| Regression guard | CI must fail on type/lint/test failures before deploy proceeds. |
+| Troubleshooting docs | Common CI failures documented (pnpm build scripts, frozen lockfile, strict typecheck). |
+
+Acceptance criteria:
+
+| Criterion | Required result |
+|---|---|
+| CI green | All steps pass on push to main. |
+| Deploy succeeds | `actions/deploy-pages` completes, live URL returns 200. |
+| Hash routing | Navigating to `/#/` and `/#/quiz/<id>` works on the deployed domain. |
+| No console errors | Chrome DevTools on deployed page shows 0 errors. |
+| CI blocks deploy on failure | A failing typecheck or test prevents the deployment step from running. |
+| Mobile deploy | Deployed page renders correctly at 375px viewport. |
+
+Key CI concerns:
+
+| Concern | Resolution |
+|---|---|
+| pnpm v11 blocks native build scripts | `pnpm-workspace.yaml` with `allowBuilds: { esbuild: true }` |
+| `vue-tsc` strict mode | Unused imports and dead code are compile errors — lint and typecheck in CI catch them before deploy. |
+| `--frozen-lockfile` | Prevents lockfile drift between local dev and CI. |
+| Cache | `pnpm/action-setup` with `cache: pnpm` avoids re-downloading dependencies. |
+| Hash routing on GitHub Pages | `base: './'` in Vite config + `createWebHashHistory()` in router — no server-side redirects needed. |
+
+Definition of done:
+
+- CI workflow passes (`typecheck`, `lint`, `test:unit`, `test:integration`, `test:components`, `build`) on every push to main.
+- `actions/deploy-pages` completes and the live URL is accessible.
+- Chrome DevTools on the deployed page shows 0 console errors at both desktop and 375px mobile viewport.
+
 ## Implementation Rules
 
 | Rule | Rationale |
