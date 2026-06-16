@@ -56,15 +56,30 @@ export async function completeSession(
   id: string,
   completedAt: number,
 ): Promise<void> {
-  const session = await getSession(id)
-  if (!session) return
-
-  const completed: QuizSession = {
-    ...session,
-    completedAt,
-    updatedAt: Date.now(),
-  }
-  await saveSession(completed)
+  await transaction(['sessions'], 'readwrite', (tx) => {
+    const store = objectStore(tx, 'sessions')
+    return new Promise<void>((resolve, reject) => {
+      const getRequest = store.get(id)
+      getRequest.onsuccess = () => {
+        const session = getRequest.result as QuizSession | undefined
+        if (!session) {
+          resolve()
+          return
+        }
+        const completed: QuizSession = {
+          ...session,
+          completedAt,
+          updatedAt: Date.now(),
+        }
+        const putRequest = store.put(completed)
+        putRequest.onsuccess = () => resolve()
+        putRequest.onerror = () =>
+          reject(putRequest.error ?? new Error('Failed to save session'))
+      }
+      getRequest.onerror = () =>
+        reject(getRequest.error ?? new Error('Failed to read session'))
+    })
+  })
 }
 
 export async function deleteSession(id: string): Promise<void> {

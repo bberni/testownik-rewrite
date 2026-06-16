@@ -8,6 +8,15 @@ import {
   quizExists,
   updateQuiz,
 } from '@/platform/persistence/quizRepository'
+import { saveAsset, getAssetsByQuiz } from '@/platform/assets/assetRepository'
+import {
+  saveSession,
+  listSessionsByQuiz,
+} from '@/platform/persistence/sessionRepository'
+import {
+  upsertRecent,
+  listRecents,
+} from '@/platform/persistence/recentRepository'
 import { closeDB } from '@/platform/persistence/db'
 import type { QuizPackage } from '@/domain/quizTypes'
 
@@ -77,11 +86,36 @@ describe('quizRepository', () => {
     expect(updated!.name).toBe('Updated')
   })
 
-  it('deletes a quiz and cascades', async () => {
+  it('deletes a quiz and cascades to sessions, assets, recents', async () => {
     await saveQuiz(makeQuiz())
+    await saveSession({
+      schemaVersion: 1,
+      id: 's1',
+      quizId: 'quiz-1',
+      startedAt: 1000,
+      updatedAt: 1000,
+      completedAt: null,
+      numberOfLearnedQuestions: 0,
+      numberOfCorrectAnswers: 0,
+      numberOfBadAnswers: 0,
+      time: 0,
+      reoccurrences: [],
+    })
+    await saveAsset({
+      quizId: 'quiz-1',
+      relativePath: 'test.jpg',
+      blob: new Blob(['test']),
+      mimeType: 'image/jpeg',
+      size: 4,
+    })
+    await upsertRecent('quiz-1')
+
     await deleteQuiz('quiz-1')
-    const result = await getQuiz('quiz-1')
-    expect(result).toBeUndefined()
+
+    expect(await getQuiz('quiz-1')).toBeUndefined()
+    expect(await listSessionsByQuiz('quiz-1')).toHaveLength(0)
+    expect(await getAssetsByQuiz('quiz-1')).toHaveLength(0)
+    expect(await listRecents()).toHaveLength(0)
   })
 
   it('checks quiz existence', async () => {
