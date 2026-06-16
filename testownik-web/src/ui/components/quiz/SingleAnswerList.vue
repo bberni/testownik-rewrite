@@ -29,7 +29,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { SingleQuestionAnswer } from '@/domain/quizTypes'
 import type { QuizPhase } from '@/ui/stores/quizSession'
 
