@@ -253,6 +253,29 @@ Add a new entry with:
 - Import save.json does not handle multiple quizzes with equal match scores (takes first best).
 - `flushTime()` called twice in `finishQuiz` path (once in `stopTimer`, once in `saveSession`) — second call is a no-op since `timerStartedAt` is already null.
 
-**Recommended next step:** Phase 8 — Static Hosting And Optional PWA (configure Vite base, hash routing, deployment workflow, PWA evaluation).
+**Recommended next step:** Phase 9 — Migration Cutover.
 
-(End of file - total 276 lines)
+---
+
+## 2026-06-16 — Phase 8: Static Hosting And Optional PWA
+
+**Scope:**
+- Added `.github/workflows/deploy.yml` — GitHub Pages deployment: check types, lint, run all 152 tests, build production, deploy to Pages.
+- Verified build output: `dist/` uses relative paths (`base: './'`), hash routing works for static hosting, no redirect rules needed.
+- Verified mobile viewport (375×812, mobile+touch emulation): landing page renders correctly, no layout issues, no console errors.
+- PWA evaluation: deferred. App already works offline for loaded content (IndexedDB + cached assets). Full offline-first PWA requires service worker + manifest, best done post-launch.
+- Bundle size: index chunk 49.85 KB gzipped, QuizPage 6.73 KB gzipped — well within static hosting budget.
+
+**Tests and checks run:**
+- `pnpm typecheck` — 0 errors
+- `pnpm lint` — 0 errors
+- `pnpm test:unit` — 109 tests pass
+- `pnpm test:integration` — 28 tests pass
+- `pnpm test:components` — 15 tests pass
+- `pnpm build` — production build succeeds
+- Mobile viewport emulation — no errors, correct layout
+- Total: 152 tests
+
+**Recommended next step:** Phase 9 — Migration Cutover.
+
+(End of file - total 296 lines)
