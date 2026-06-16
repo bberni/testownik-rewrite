@@ -19,7 +19,7 @@
           rel="noopener noreferrer"
           class="info__link"
         >
-          Kamil Golec
+          bberni
         </a>
       </p>
       <p class="info__detail">
