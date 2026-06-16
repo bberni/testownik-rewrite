@@ -351,7 +351,7 @@ Objectives:
 | Define virtual file tree | Common representation for folder picker, drag/drop, and file input. |
 | Implement Chromium folder import | Use `showDirectoryPicker` when available. |
 | Implement fallback file import | Use `input[type=file][webkitdirectory]` when needed. |
-| Implement drag/drop import | Accept dropped directories/files where browser supports it. |
+| Implement drag/drop import | Accept dropped directories/files where browser supports it. Must use both `getAsEntry()` (Firefox) and `webkitGetAsEntry()` (Chromium) for entry retrieval. |
 | Normalize paths | Use forward slashes, strip root prefix, preserve relative asset links. |
 | Detect `save.json` | Offer continue/import saved progress or start fresh. |
 | Build asset map | Store referenced image blobs and resolve object URLs at render time. |

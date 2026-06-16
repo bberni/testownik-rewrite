@@ -3,11 +3,14 @@ import type { VirtualDirectory } from './importedFileTree'
 export function isDirectoryDragSupported(): boolean {
   return (
     'DataTransferItem' in globalThis &&
-    typeof (
-      DataTransferItem.prototype as {
-        webkitGetAsEntry?: unknown
-      }
-    ).webkitGetAsEntry === 'function'
+    (typeof (
+      (DataTransferItem.prototype as { webkitGetAsEntry?: unknown })
+        .webkitGetAsEntry
+    ) === 'function' ||
+      typeof (
+        (DataTransferItem.prototype as { getAsEntry?: unknown })
+          .getAsEntry
+      ) === 'function')
   )
 }
 
@@ -82,10 +85,14 @@ export async function handleDrop(
 
   const entries: FileSystemEntry[] = []
   for (const item of Array.from(items)) {
+    const itemProto = item as DataTransferItem & {
+      webkitGetAsEntry?: () => FileSystemEntry | null
+      getAsEntry?: () => FileSystemEntry | null
+    }
     const entry =
-      'getAsEntry' in item
-        ? (item as DataTransferItem).webkitGetAsEntry?.()
-        : null
+      itemProto.getAsEntry?.() ??
+      itemProto.webkitGetAsEntry?.() ??
+      null
     if (entry) {
       entries.push(entry)
     }
