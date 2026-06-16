@@ -14,6 +14,7 @@ This repo is for rewriting `testownik-electron` into a modern static-hosted web 
 
 - Work on a feature branch. Do not make implementation changes directly on the main branch.
 - Keep changes small and aligned with the current phase in `.ai/PLAN.md`.
+- Read the progress from `.ai/PROGRESS.md` to know from which point on to continue.
 - Preserve feature parity with the Electron reference where the plan requires it.
 - Prefer pure domain logic for parser and quiz engine code; isolate browser APIs in platform/adapters.
 - Keep mobile support as a required target, not an optional follow-up.
