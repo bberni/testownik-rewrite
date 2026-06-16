@@ -206,14 +206,14 @@ function handleImportError(e: unknown) {
   error.value = e instanceof Error ? e.message : 'Import nie powiódł się.'
 }
 
-function continueItem(quizId: string) {
-  library.markOpened(quizId)
-  router.push({ name: 'quiz', params: { quizId } })
+async function continueItem(quizId: string) {
+  await library.markOpened(quizId)
+  router.push({ name: 'quiz', params: { quizId }, query: { mode: 'continue' } })
 }
 
-function startNewItem(quizId: string) {
-  library.markOpened(quizId)
-  router.push({ name: 'quiz', params: { quizId } })
+async function startNewItem(quizId: string) {
+  await library.markOpened(quizId)
+  router.push({ name: 'quiz', params: { quizId }, query: { mode: 'new' } })
 }
 
 function promptDelete(quizId: string) {

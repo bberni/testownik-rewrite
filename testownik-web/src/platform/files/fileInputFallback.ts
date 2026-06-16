@@ -40,7 +40,7 @@ export function importViaFileInput(
   })
 }
 
-function buildTreeFromFileList(
+export function buildTreeFromFileList(
   fileList: FileList,
 ): VirtualDirectory | null {
   if (fileList.length === 0) return null

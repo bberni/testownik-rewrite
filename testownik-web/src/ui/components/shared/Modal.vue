@@ -8,7 +8,8 @@
       <div class="modal-wrapper">
         <div
           class="modal"
-          @keydown.escape="$emit('close')"
+          role="dialog"
+          aria-modal="true"
         >
           <div class="modal__header">
             <slot name="header">
@@ -33,14 +34,38 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { watch, onScopeDispose } from 'vue'
+
+const props = defineProps<{
   open: boolean
   title?: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   close: []
 }>()
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) {
+      document.addEventListener('keydown', onKeyDown)
+    } else {
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  },
+  { immediate: true },
+)
+
+onScopeDispose(() => {
+  document.removeEventListener('keydown', onKeyDown)
+})
+
+function onKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    emit('close')
+  }
+}
 </script>
 
 <style scoped>

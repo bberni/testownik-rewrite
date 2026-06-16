@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { isFileSystemAccessSupported } from '@/platform/files/fileSystemAccess'
-import { importViaFileInput } from '@/platform/files/fileInputFallback'
+import { buildTreeFromFileList } from '@/platform/files/fileInputFallback'
 import { handleDrop } from '@/platform/files/dragDrop'
 import type { VirtualDirectory } from '@/platform/files/importedFileTree'
 
@@ -79,11 +79,11 @@ async function onDrop(event: DragEvent) {
   }
 }
 
-async function onFileInput(event: Event) {
+function onFileInput(event: Event) {
   const input = event.target as HTMLInputElement
   if (!input.files || input.files.length === 0) return
   try {
-    const dir = await importViaFileInput(input)
+    const dir = buildTreeFromFileList(input.files)
     if (dir) {
       emit('imported', dir)
     }

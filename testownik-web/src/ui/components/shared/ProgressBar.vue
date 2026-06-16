@@ -13,7 +13,6 @@ import { computed } from 'vue'
 const props = defineProps<{
   progress: number
   color?: string
-  backgroundColor?: string
 }>()
 
 const fillStyle = computed(() => ({

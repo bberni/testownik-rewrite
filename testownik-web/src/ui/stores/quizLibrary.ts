@@ -3,6 +3,7 @@ import {
   listQuizzes,
   deleteQuiz as deleteQuizFromDb,
   saveQuiz,
+  getQuizByFingerprint,
 } from '@/platform/persistence/quizRepository'
 import { getLatestSession } from '@/platform/persistence/sessionRepository'
 import { saveAssets } from '@/platform/assets/assetRepository'
@@ -91,6 +92,13 @@ export const useQuizLibraryStore = defineStore('quizLibrary', {
     },
 
     async importResult(result: ImportResult) {
+      const existing = await getQuizByFingerprint(result.fingerprint)
+      if (existing) {
+        throw new Error(
+          `Quiz "${result.name}" jest już zaimportowany jako "${existing.name}".`,
+        )
+      }
+
       const now = Date.now()
       const id = crypto.randomUUID()
       const assetRefs: StoredAssetRef[] = result.assets.map((a) => ({
