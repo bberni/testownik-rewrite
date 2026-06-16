@@ -1,8 +1,18 @@
 # Testownik Web
 
-A modern static-hosted rewrite of [testownik-electron](https://github.com/Kamill90/testownik-electron) — an offline quiz solving app for Polish university students.
+A static web app rewrite of [testownik-electron](https://github.com/Kamill90/testownik-electron) - credits to [Kamil Golec](https://github.com/kumalg) and [Jakub Kozłowski](https://github.com/kubukoz)
 
-Deployed at **[bberni.github.io/testownik-rewrite](https://bberni.github.io/testownik-rewrite/)**.
+100% vibecoded with DeepSeek V4 Pro as an experiment.
+
+You can run it locally, or use the Github Pages version on **[bberni.github.io/testownik-rewrite](https://bberni.github.io/testownik-rewrite/)**. Regardless of which one you choose, all the data stays in your browser.
+
+Should work both on desktop and mobile browsers.
+
+If something is broken/missing from original app, or you have a feature proposal, please create a Github issue with description and screenshots.
+
+If you find any security issues, please DM me at Discord (@bberni) with details.
+
+Enjoy the rest of the readme, courtesy of DeepSeek of course:
 
 ## Quick Start
 
