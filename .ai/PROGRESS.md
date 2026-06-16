@@ -139,3 +139,45 @@ Add a new entry with:
 - Image ref matching doesn't have a test for subdirectory refs (`[img]subdir/photo.jpg[/img]`).
 
 **Recommended next step:** Phase 5 — Landing Page and Quiz Library (import UI, recent/library list, empty states, settings/info entry points).
+
+---
+
+## 2026-06-16 — Phase 5: Landing Page And Quiz Library
+
+**Scope:**
+- Installed Pinia for Vue state management.
+- Created `settingsStore` — theme and reoccurrence settings with IndexedDB persistence, applies `data-theme` attribute on load.
+- Created `quizLibraryStore` — quiz library CRUD, import orchestration (fingerprint dedup), progress enrichment from session data.
+- Created shared components: `Modal` (Teleport, Escape key, mask click-to-close, `role=dialog`/`aria-modal`), `ProgressBar`.
+- Created `ImportArea` — drag/drop zone, FSAA button, file input fallback, mobile responsive.
+- Created `QuizCard` — quiz name, question count, progress bars (correct/learned), continue/start/delete actions.
+- Created modals: `SettingsModal` (theme radio, reoccurrence number inputs), `InfoModal` (version, author), `DeleteQuizModal` (confirmation).
+- Rewrote `LandingPage.vue` — header with settings/info buttons, import area, quiz list with cards, error banners, loading state, empty state, mobile layout (max-width 480px breakpoints).
+- Installed `@vue/test-utils` + `@pinia/testing` for component testing.
+- Added `vitest.components.config.ts` with jsdom environment.
+- Added `test:components` script to package.json.
+- Fixed double file-picker bug by exporting `buildTreeFromFileList` from `fileInputFallback.ts`.
+- Fixed Modal Escape key via document-level keydown listener with `watch`/`onScopeDispose` lifecycle.
+- Added `mode=continue|new` query param to differentiate quiz launching intent.
+
+**Tests and checks run:**
+- `pnpm typecheck` — passes (0 errors)
+- `pnpm lint` — passes (0 errors)
+- `pnpm test:unit` — 109 tests pass
+- `pnpm test:components` — 15 tests pass (6 Modal, 9 QuizCard)
+- `pnpm test:integration` — 28 tests pass
+- `pnpm build` — production build succeeds
+- Total: 152 tests
+
+**Code review result:** PASS WITH FIXES — 2 blockers + 5 majors + 7 minors found, all blockers and majors fixed pre-merge (double file-picker, Escape key, continue/startNew differentiation, fingerprint dedup, unused prop).
+
+**Known follow-ups:**
+- Landing page has no E2E test beyond the basic load test from Phase 1.
+- `importViaFileInput` still available but unused by components — consider removal.
+- `ProgressBar.backgroundColor` prop removed (was unused) — re-add if needed later.
+- Modal focus trapping and focus restoration not implemented (carried over from Electron reference).
+- `upsertRecent` inside `markOpened` now awaited before navigation (fixes race condition).
+
+**Recommended next step:** Phase 6 — Quiz Page (question rendering, answer checking, stats sidebar, action button, modals, keyboard, mobile).
+
+(End of file - total 192 lines)
