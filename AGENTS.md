@@ -32,3 +32,4 @@ This repo is for rewriting `testownik-electron` into a modern static-hosted web 
 - Repeat the fix, test, and review loop until the review is positive.
 - Merge only after tests pass and the code review gates are satisfied.
 - After merging, write the current implementation progress, merged scope, tests run, and next recommended step in `.ai/PROGRESS.md`.
+- Push to the remote repository after a successful merge. Use `git push origin main`.
