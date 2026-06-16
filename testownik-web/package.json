@@ -14,6 +14,7 @@
     "format:check": "prettier --check .",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
+    "test:components": "vitest run --config vitest.components.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
     "test:e2e:mobile": "playwright test --project=mobile",
@@ -21,14 +22,17 @@
     "test": "pnpm typecheck && pnpm test:unit && pnpm test:e2e"
   },
   "dependencies": {
+    "pinia": "^3.0.4",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@pinia/testing": "^1.0.3",
     "@playwright/test": "^1.54.0",
     "@tsconfig/strictest": "^2.0.5",
     "@types/node": "^24.6.0",
     "@vitejs/plugin-vue": "^5.2.4",
+    "@vue/test-utils": "^2.4.11",
     "@vue/tsconfig": "^0.7.0",
     "eslint": "^9.32.0",
     "eslint-plugin-vue": "^10.2.0",
