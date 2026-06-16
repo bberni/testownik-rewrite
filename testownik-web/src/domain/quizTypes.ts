@@ -54,6 +54,7 @@ export interface QuestionReoccurrence {
 }
 
 export interface QuizSession {
+  schemaVersion: 1
   id: string
   quizId: string
   startedAt: number
