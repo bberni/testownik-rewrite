@@ -32,7 +32,9 @@ jobs:
           cache-dependency-path: testownik-web/pnpm-lock.yaml
       - name: Install dependencies
         working-directory: testownik-web
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm approve-builds esbuild
+          pnpm install --frozen-lockfile
       - name: Typecheck
         working-directory: testownik-web
         run: pnpm typecheck
