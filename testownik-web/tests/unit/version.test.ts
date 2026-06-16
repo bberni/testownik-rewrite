@@ -5,4 +5,8 @@ describe('app version', () => {
   it('is a string', () => {
     expect(typeof APP_VERSION).toBe('string')
   })
+
+  it('matches the expected version', () => {
+    expect(APP_VERSION).toBe('0.1.0')
+  })
 })
