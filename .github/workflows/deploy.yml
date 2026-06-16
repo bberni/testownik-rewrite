@@ -27,7 +27,7 @@ jobs:
           version: latest
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           cache-dependency-path: testownik-web/pnpm-lock.yaml
       - name: Install dependencies
