@@ -86,6 +86,22 @@
           <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2zM17 21v-8H7v8M7 3v5h8" />
         </svg>
       </button>
+      <button
+        class="stats__action-btn"
+        title="Eksportuj save.json"
+        @click="$emit('exportSave')"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+        </svg>
+      </button>
     </div>
   </div>
 </template>
@@ -109,6 +125,7 @@ defineEmits<{
   openSettings: []
   openInfo: []
   saveExit: []
+  exportSave: []
 }>()
 
 const formattedTime = computed(() => formatDuration(props.time))

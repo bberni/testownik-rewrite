@@ -20,6 +20,9 @@ import {
   pickRandomQuestion,
   computeProgress,
 } from '@/domain/quizEngine'
+import { serializeSaveJson } from '@/domain/saveJsonCompat'
+import { triggerDownload } from '@/platform/browser/download'
+import { addVisibilityListener } from '@/platform/browser/visibility'
 
 export type QuizPhase = 'answering' | 'revealed' | 'finished'
 
@@ -51,6 +54,10 @@ export const useQuizSessionStore = defineStore('quizSession', {
     phase: 'answering' as QuizPhase,
     timerRunning: false,
     timerInterval: null as ReturnType<typeof setInterval> | null,
+    timerStartedAt: null as number | null,
+    timerTick: 0,
+    autosaveInterval: null as ReturnType<typeof setInterval> | null,
+    removeVisibilityListener: null as (() => void) | null,
 
     lastCorrect: false,
     revealedCorrectIds: [] as number[],
@@ -64,6 +71,13 @@ export const useQuizSessionStore = defineStore('quizSession', {
   }),
 
   getters: {
+    time(state): number {
+      if (!state.session) return 0
+      void state.timerTick
+      const elapsed = state.timerStartedAt !== null ? Date.now() - state.timerStartedAt : 0
+      return state.session.time + elapsed
+    },
+
     currentReoccurrences(state): number {
       if (!state.currentTag) return 0
       const rec = state.session?.reoccurrences.find(
@@ -261,21 +275,52 @@ export const useQuizSessionStore = defineStore('quizSession', {
     startTimer() {
       if (this.timerInterval) return
       this.timerRunning = true
+      this.timerStartedAt = Date.now()
+      this.timerTick = 0
       this.timerInterval = setInterval(() => {
-        if (this.session) {
-          this.session = {
-            ...this.session,
-            time: this.session.time + 1000,
-          }
-        }
+        this.timerTick++
       }, 1000)
+      this.autosaveInterval = setInterval(() => {
+        void this.saveSession({ silent: true })
+      }, 30000)
+      this.removeVisibilityListener = addVisibilityListener((hidden) => {
+        if (hidden) {
+          void this.saveSession({ silent: true })
+        }
+      })
     },
 
     stopTimer() {
       this.timerRunning = false
+      if (this.timerStartedAt !== null && this.session) {
+        this.session = {
+          ...this.session,
+          time: this.session.time + (Date.now() - this.timerStartedAt),
+        }
+      }
+      this.timerStartedAt = null
+      this.timerTick = 0
       if (this.timerInterval) {
         clearInterval(this.timerInterval)
         this.timerInterval = null
+      }
+      if (this.autosaveInterval) {
+        clearInterval(this.autosaveInterval)
+        this.autosaveInterval = null
+      }
+      if (this.removeVisibilityListener) {
+        this.removeVisibilityListener()
+        this.removeVisibilityListener = null
+      }
+    },
+
+    flushTime() {
+      if (this.timerStartedAt !== null && this.session) {
+        this.session = {
+          ...this.session,
+          time: this.session.time + (Date.now() - this.timerStartedAt),
+        }
+        this.timerStartedAt = Date.now()
       }
     },
 
@@ -290,13 +335,29 @@ export const useQuizSessionStore = defineStore('quizSession', {
       await this.saveSession()
     },
 
-    async saveSession() {
+    async saveSession(options?: { silent?: boolean }) {
       if (!this.session) return
+      this.flushTime()
       try {
         await saveSession(this.session)
-      } catch {
-        // Fail silently for autosave
+      } catch (e) {
+        if (!options?.silent) {
+          console.error('Failed to save quiz session:', e)
+        }
       }
+    },
+
+    exportSaveJson(): void {
+      if (!this.session) return
+      const json = serializeSaveJson(
+        this.questions.length,
+        this.session.numberOfLearnedQuestions,
+        this.session.numberOfCorrectAnswers,
+        this.session.numberOfBadAnswers,
+        this.session.time,
+        this.session.reoccurrences,
+      )
+      triggerDownload('save.json', json)
     },
   },
 })

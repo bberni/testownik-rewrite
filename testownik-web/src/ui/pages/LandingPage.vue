@@ -78,6 +78,39 @@
           @imported="handleImport"
           @error="handleImportError"
         />
+        <label class="landing__save-import">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line
+              x1="16"
+              y1="13"
+              x2="8"
+              y2="13"
+            />
+            <line
+              x1="16"
+              y1="17"
+              x2="8"
+              y2="17"
+            />
+            <polyline points="10,9 9,9 8,9" />
+          </svg>
+          Zaimportuj save.json
+          <input
+            type="file"
+            accept=".json"
+            class="landing__save-import-input"
+            @change="onSaveFileSelected"
+          >
+        </label>
       </div>
 
       <div class="landing__library">
@@ -204,6 +237,26 @@ async function handleImport(dir: Parameters<typeof runImportPipeline>[0]) {
 
 function handleImportError(e: unknown) {
   error.value = e instanceof Error ? e.message : 'Import nie powiódł się.'
+}
+
+async function onSaveFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  try {
+    const result = await library.matchAndImportSaveJson(file)
+    error.value = null
+    // Navigate to continue the restored quiz
+    await router.push({
+      name: 'quiz',
+      params: { quizId: result.quizId },
+      query: { mode: 'continue' },
+    })
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'Import save.json nie powiódł się.'
+  } finally {
+    input.value = ''
+  }
 }
 
 async function continueItem(quizId: string) {
@@ -351,5 +404,31 @@ async function confirmDelete() {
   .landing__title {
     font-size: 1.25rem;
   }
+}
+
+.landing__save-import {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--secondary-text);
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.landing__save-import:hover {
+  color: var(--primary-text);
+}
+
+.landing__save-import-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>
