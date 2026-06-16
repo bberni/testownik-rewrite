@@ -11,9 +11,6 @@ dist/
 playwright-report/
 test-results/
 
-# Generated
-pnpm-workspace.yaml
-
 # IDE
 .vscode/
 .idea/
