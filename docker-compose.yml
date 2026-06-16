@@ -1,0 +1,23 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./testownik-web:/app
+      - /app/node_modules
+    working_dir: /app
+    command: pnpm dev --host 0.0.0.0
+
+  preview:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    ports:
+      - '4173:4173'
+    working_dir: /app
+    command: pnpm preview --host 0.0.0.0
