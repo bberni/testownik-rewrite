@@ -180,4 +180,45 @@ Add a new entry with:
 
 **Recommended next step:** Phase 6 — Quiz Page (question rendering, answer checking, stats sidebar, action button, modals, keyboard, mobile).
 
-(End of file - total 192 lines)
+---
+
+## 2026-06-16 — Phase 6: Quiz Page
+
+**Scope:**
+- Created `quizSessionStore` — full quiz flow state: init (new/continue), question picking via `pickRandomQuestion`, answer checking via `checkSingleAnswer`/`checkSelectAnswer`, reoccurrence updates via `applyAnswerResult`, timer with setInterval, autosave to IndexedDB, finish detection, answer shuffle in state (not getter).
+- Created `useAssetUrls` composable — loads asset blobs from IndexedDB, creates/revokes object URLs, provides `getUrl(relativePath)` resolver.
+- Created `QuizQuestion.vue` — renders text/image question content, select placeholders with fill/correct/wrong styling, image fallback.
+- Created `SingleAnswerList.vue` — 2-column grid of answers with checkboxes, custom indicators, correct/wrong/missed reveal states with color-coded borders.
+- Created `StatsSidebar.vue` — progress bars (correct/learned ratio), numeric counts (correct/bad, learned/total), question count, formatted time, tag × reoccurrences, settings/info/exit action buttons.
+- Created `SelectOptionsModal.vue` — option picker for select-type questions, correct/wrong reveal highlighting.
+- Created `FinishQuizModal.vue` — final stats (time, correct, bad, learned) with return button.
+- Rewrote `QuizPage.vue` — full-height flex layout with main question area + sidebar, accept/next action button, keyboard handling (Space accept/next, 1-9 toggle, Escape close modals), mobile responsive at 768px, save/exit modal with progress prompt.
+- Fixed timer leak by stopping timer in `onUnmounted`.
+- Fixed continue mode not persisting newly created sessions.
+- Fixed select modal clickable during reveal phase.
+- Fixed Space key firing when modals are open.
+- Moved answer shuffle from computed getter to `pickNext()` action.
+- Refactored session creation with shared `createNewSession` helper.
+
+**Tests and checks run:**
+- `pnpm typecheck` — passes (0 errors)
+- `pnpm lint` — passes (0 errors)
+- `pnpm test:unit` — 109 tests pass
+- `pnpm test:components` — 15 tests pass
+- `pnpm test:integration` — 28 tests pass
+- `pnpm build` — production build succeeds (QuizPage chunk: 18.88 KB)
+- Total: 152 tests
+
+**Code review result:** PASS WITH FIXES — 2 blockers + 6 majors + 8 minors found, all blockers and majors fixed pre-merge (timer leak, missing FinishQuizModal, missing session save, Math.random in getter, select click during reveal, Space key guard, numeric stats counts).
+
+**Known follow-ups:**
+- No component tests for quiz components (QuizQuestion, SingleAnswerList, StatsSidebar, SelectOptionsModal, FinishQuizModal) — E2E or component tests needed.
+- Keyboard handler depends on div focus — consider global `document.addEventListener` for keyboard shortcuts.
+- `imgFailed` in QuizQuestion is a computed always returning false — should be `ref`.
+- No CSS transition animations for question changes (Electron has fade transitions).
+- `formatDuration` still in `saveJsonCompat.ts` — should be extracted to `domain/duration.ts`.
+- Keyboard handler missing `Numpad1-9` and `Backquote` key codes.
+
+**Recommended next step:** Phase 7 — Autosave, Restore, And Export (autosave answers/timer, restore session, start new, export/import save.json).
+
+(End of file - total 239 lines)
