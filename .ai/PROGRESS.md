@@ -9,6 +9,7 @@ Use this file to record the current project state after each merge.
 - Phase 1: Scaffold Web App — complete.
 - Phase 2: Port Domain Logic — complete.
 - Phase 3: Persistence Layer — complete.
+- Phase 4: Import Pipeline — complete.
 
 ## After Each Merge
 
@@ -110,3 +111,31 @@ Add a new entry with:
 - `upgrade()` ignores `oldVersion` — migration hooks needed for future versions.
 
 **Recommended next step:** Phase 4 — Import Pipeline.
+
+---
+
+## 2026-06-16 — Phase 4: Import Pipeline
+
+**Scope:**
+- Implemented `importedFileTree.ts` — Virtual file tree types (`VirtualFile`, `VirtualDirectory`) and utilities (`findFile`, `listAllFiles`, `listFilesByExtension`).
+- Implemented `fileSystemAccess.ts` — Chromium `showDirectoryPicker()` folder import with recursive directory reading, feature detection via `isFileSystemAccessSupported()`.
+- Implemented `fileInputFallback.ts` — `<input type="file" webkitdirectory>` fallback with `buildTreeFromFileList()` path normalization (backslash → forward slash).
+- Implemented `dragDrop.ts` — Drag/drop handler using `webkitGetAsEntry` FileSystemEntry API, feature detection.
+- Implemented `fingerprint.ts` — Stable djb2 hash fingerprint from sorted file names + content hashes of .txt files (pure domain logic).
+- Implemented `importPipeline.ts` — Full import orchestrator: decode .txt files (UTF-8/Windows-1250), parse questions, collect image asset Blobs, compute fingerprint, detect save.json.
+
+**Tests and checks run:**
+- `pnpm typecheck` — passes (0 errors)
+- `pnpm lint` — passes (0 errors)
+- `pnpm test:unit` — 109 tests pass (+26 from Phase 3)
+- `pnpm test:integration` — 29 tests pass
+- `pnpm build` — static production build succeeds
+
+**Code review result:** PASS WITH NOTES — 2 major findings fixed pre-merge (dragDrop feature detection, image asset matching precision).
+
+**Known follow-ups:**
+- `fileSystemAccess.ts`, `fileInputFallback.ts`, `dragDrop.ts` have no unit tests (need browser mocks).
+- `ImportedAsset.mimeType` and `.size` are derivable from `.blob` — consider removing redundant fields.
+- Image ref matching doesn't have a test for subdirectory refs (`[img]subdir/photo.jpg[/img]`).
+
+**Recommended next step:** Phase 5 — Landing Page and Quiz Library (import UI, recent/library list, empty states, settings/info entry points).
