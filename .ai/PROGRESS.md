@@ -8,6 +8,7 @@ Use this file to record the current project state after each merge.
 - `testownik-electron/` remains the legacy reference implementation.
 - Phase 1: Scaffold Web App — complete.
 - Phase 2: Port Domain Logic — complete.
+- Phase 3: Persistence Layer — complete.
 
 ## After Each Merge
 
@@ -78,4 +79,34 @@ Add a new entry with:
 - `formatDuration` embedded in `saveJsonCompat.ts` — could be extracted to own module.
 - `getLinkToImage` returns `''` instead of `undefined` for missing `[/img]` (intentional defensive improvement).
 
-**Recommended next step:** Phase 3 — Persistence Layer (IndexedDB wrapper, quiz/asset/session/settings/recent repositories).
+**Recommended next step:** Phase 4 — Import Pipeline (folder picker, file input fallback, drag/drop, virtual file tree, fingerprinting, asset mapping).
+
+---
+
+## 2026-06-16 — Phase 3: Persistence Layer
+
+**Scope:**
+- Implemented `db.ts` — IndexedDB wrapper with versioned schema (v1), transaction helper, `StorageError` for quota/blocked/upgrade errors, `openDB`/`closeDB` lifecycle.
+- Implemented `quizRepository.ts` — save/get/list/update/delete `QuizPackage` by ID, find by fingerprint, cascade delete (removes sessions + assets + recents).
+- Implemented `assetRepository.ts` — store/fetch/delete Blobs keyed by quizId + relativePath, with `getAll` for quiz index.
+- Implemented `sessionRepository.ts` — CRUD for `QuizSession`, get latest by quiz, atomic `completeSession`, cascade delete by quiz.
+- Implemented `settingsRepository.ts` — persist `AppSettings` with defaults (theme: dark, reoccurrencesOnStart: 2, maxReoccurrences: 10), partial merge on save.
+- Implemented `recentRepository.ts` — upsert recent entry, list ordered by lastOpenedAt desc, delete.
+- Added `jsdom` + `fake-indexeddb` for integration test environment.
+- Added `schemaVersion: 1` to `QuizSession` type.
+
+**Tests and checks run:**
+- `pnpm typecheck` — passes (0 errors)
+- `pnpm lint` — passes (0 errors)
+- `pnpm test:unit` — 83 tests pass
+- `pnpm test:integration` — 29 tests pass (5 quiz, 4 settings, 4 recents, 7 session, 5 asset + 4 cascade)
+- `pnpm build` — static production build succeeds
+
+**Code review result:** PASS WITH NOTES — 3 items fixed before merge (atomic completeSession, .gitkeep cleanup, cascade test extension).
+
+**Known follow-ups:**
+- Asset records lack `schemaVersion` (minor — shape unlikely to change).
+- `getQuizByFingerprint` does linear O(n) scan (no fingerprint index).
+- `upgrade()` ignores `oldVersion` — migration hooks needed for future versions.
+
+**Recommended next step:** Phase 4 — Import Pipeline.
