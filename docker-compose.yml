@@ -12,12 +12,10 @@ services:
     working_dir: /app
     command: pnpm dev --host 0.0.0.0
 
-  preview:
+  prod:
     build:
       context: .
       dockerfile: Dockerfile
-      target: build
+      target: prod
     ports:
-      - '4173:4173'
-    working_dir: /app
-    command: pnpm preview --host 0.0.0.0
+      - '8080:80'

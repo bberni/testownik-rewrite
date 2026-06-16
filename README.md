@@ -33,9 +33,11 @@ pnpm dev        # http://localhost:5173
 # Development (hot-reload on :5173)
 docker compose up dev
 
-# Production preview (built dist on :4173)
-docker compose up preview
+# Production (static build served by nginx on :8080)
+docker compose up prod
 ```
+
+The production image runs `pnpm build` and serves `dist/` through nginx, matching the GitHub Pages deploy.
 
 ## Tech Stack
 
