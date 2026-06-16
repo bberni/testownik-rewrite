@@ -101,7 +101,7 @@ describe('parseQuestionFile - X format (single/multiple-choice)', () => {
     expect(result!.answers).toHaveLength(3)
   })
 
-  it('returns correct answer IDs starting from 0', () => {
+  it('returns correct answer IDs starting from 0 (X101 mask)', () => {
     const text = xQuestion('X101', 'Q', ['A', 'B', 'C'])
     const result = parseQuestionFile('test.txt', text)
     const answers = result!.answers as {
@@ -113,7 +113,7 @@ describe('parseQuestionFile - X format (single/multiple-choice)', () => {
     expect(answers[2]!.id).toBe(2)
   })
 
-  it('returns correct answer IDs starting from 0', () => {
+  it('returns correct answer IDs starting from 0 (X001 mask)', () => {
     const text = xQuestion('X001', 'Q', ['A', 'B', 'C'])
     const result = parseQuestionFile('test.txt', text)
     const answers = result!.answers as {
@@ -204,6 +204,21 @@ describe('parseQuestionFile - Y format (select)', () => {
       options: unknown[]
     }[]
     expect(answers[0]!.options).toHaveLength(3)
+  })
+
+  it('parses Y question with image question body', () => {
+    const text = yQuestion(
+      'Y21',
+      '[img]diagram.jpg[/img] {wybór 1}',
+      ['Opcja A;;Opcja B'],
+    )
+    const result = parseQuestionFile('test.txt', text)
+    expect(result).not.toBeNull()
+    expect(result!.contentType).toBe('image')
+    const content = result!.content
+    expect(Array.isArray(content)).toBe(true)
+    expect(content).toHaveLength(1)
+    expect(content[0]).toBe('diagram.jpg')
   })
 })
 

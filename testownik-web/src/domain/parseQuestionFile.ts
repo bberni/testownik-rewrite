@@ -1,5 +1,6 @@
 import type {
   Question,
+  QuestionContent,
   SingleQuestionAnswer,
   SelectQuestionAnswer,
   SelectOption,
@@ -24,7 +25,7 @@ function readXQuestion(filename: string, lines: string[]): Question | null {
   const correctAnswers = parseCorrectMask(lines[0]!)
   const questionType = lines[1]!.trim().startsWith('[img]') ? 'image' : 'text'
   const questionContent =
-    questionType === 'image' ? getLinkToImage(lines[1]!) : lines[1]!.trim()
+    questionType === 'image' ? getLinkToImage(lines[1]!) : lines[1]!
 
   const answers: SingleQuestionAnswer[] = lines
     .slice(2)
@@ -80,9 +81,9 @@ function readYQuestion(filename: string, lines: string[]): Question | null {
 
   const questionType = lines[1]!.trim().startsWith('[img]') ? 'image' : 'text'
 
-  const questionContent =
+  const questionContent: QuestionContent =
     questionType === 'image'
-      ? getLinkToImage(lines[1]!)
+      ? [getLinkToImage(lines[1]!)]
       : parseYContent(lines[1]!)
 
   const answers: SelectQuestionAnswer[] = lines
