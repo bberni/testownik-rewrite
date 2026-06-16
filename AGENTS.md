@@ -34,3 +34,10 @@ This repo is for rewriting `testownik-electron` into a modern static-hosted web 
 - Merge only after tests pass and the code review gates are satisfied.
 - After merging, write the current implementation progress, merged scope, tests run, and next recommended step in `.ai/PROGRESS.md`.
 - Push to the remote repository after a successful merge. Use `git push origin main`.
+
+## Bug Fixes
+
+- Treat every bug fix like a phase-completion change: reproduce or identify the root cause, implement the smallest correct fix, run the relevant checks, and run the full required suite when the bug can affect app behavior.
+- After fixing a bug, spawn a subagent code review using `.ai/CODE_REVIEW.md`. If the review finds blockers or majors, fix them, rerun tests, and repeat review until positive.
+- For frontend bug fixes, include chrome-devtools MCP verification when the behavior can be exercised in the browser, including mobile viewport checks when layout or touch behavior may be affected.
+- Do not stop at a local fix if the repo is past Phase 10. After pushing, verify the GitHub Actions deploy workflow completes successfully with `gh run list` / `gh run view`, and verify the deployed GitHub Pages app when the bug affects runtime behavior.
