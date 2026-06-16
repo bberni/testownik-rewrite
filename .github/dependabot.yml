@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /testownik-web
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Europe/Warsaw
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - javascript
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+      prod-dependencies:
+        dependency-type: production
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Europe/Warsaw
+    labels:
+      - dependencies
+      - ci
