@@ -25,3 +25,5 @@ Thumbs.db
 
 # Playwright
 .playwright-cli/
+
+.pnpm-store/
