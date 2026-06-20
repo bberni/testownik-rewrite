@@ -2,7 +2,7 @@
   <div class="single-answers">
     <label
       v-for="answer in answers"
-      :key="answer.id"
+      :key="`${questionTag}-${answer.id}`"
       class="single-answer"
       :class="answerClasses(answer)"
     >
@@ -37,6 +37,7 @@ const props = defineProps<{
   selectedIds: number[]
   phase: QuizPhase
   correctIds: number[]
+  questionTag: string
   getImgUrl: (path: string) => string | null
 }>()
 

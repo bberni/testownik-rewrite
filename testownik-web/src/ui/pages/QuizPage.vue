@@ -38,6 +38,7 @@
           :selected-ids="selectedIds"
           :phase="phase"
           :correct-ids="revealedCorrectIds"
+          :question-tag="currentTag ?? ''"
           :get-img-url="getAssetUrl"
           @toggle="store.toggleAnswer"
         />

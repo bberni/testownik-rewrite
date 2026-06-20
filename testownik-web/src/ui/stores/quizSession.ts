@@ -186,6 +186,8 @@ export const useQuizSessionStore = defineStore('quizSession', {
         this.questions.find((q) => q.tag === tag) ?? null
       this.selectedIds = []
       this.selectSelections = {}
+      this.revealedCorrectIds = []
+      this.revealedSelectResults = []
       this.shuffledSingleAnswers = shuffleSingleAnswers(this.currentQuestion)
       this.phase = 'answering'
     },
