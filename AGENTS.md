@@ -33,6 +33,7 @@ The rewrite phases are complete. Future work should be driven by GitHub issues, 
 - For features, define acceptance criteria from the issue before coding. Ask one concise clarification question if the expected behavior is ambiguous.
 - Prefer small, direct changes that preserve the existing architecture.
 - Use current external-library documentation before changing framework, tool, CLI, or dependency behavior.
+- If you start the application for testing, always use docker compose setup
 
 ## Before Committing
 
