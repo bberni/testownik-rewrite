@@ -1,354 +1,95 @@
-# Implementation Progress
+# Maintenance Progress
 
-Use this file to record the current project state after each merge.
+Use this file to record the current project state after each merged maintenance change.
 
 ## Current Status
 
-- Rewrite planning docs are in `.ai/`.
-- `testownik-electron/` remains the legacy reference implementation.
-- Phase 1: Scaffold Web App — complete.
-- Phase 2: Port Domain Logic — complete.
-- Phase 3: Persistence Layer — complete.
-- Phase 4: Import Pipeline — complete.
+| Area | Status |
+|---|---|
+| Rewrite | Complete. The old rewrite phases are closed. |
+| Active app | `testownik-web/` |
+| Deployment | GitHub Pages via `.github/workflows/deploy.yml` |
+| Runtime URL | `https://bberni.github.io/testownik-rewrite/` |
+| Workflow | Future work is issue-driven using `.ai/PLAN.md` and `.ai/ISSUE_FIX_PLAN.md`. |
+
+## Current Known Maintenance Backlog
+
+These are persistent follow-ups from the completed rewrite and later maintenance. GitHub issues remain the source of truth for active work.
+
+| Area | Follow-up |
+|---|---|
+| E2E coverage | Existing Playwright coverage is minimal and should grow around real quiz flows. |
+| Manual QA | Real historical quiz fixtures are still valuable for import, images, Windows-1250, save import/export, and full solve flows. |
+| Accessibility | Modal focus trapping and focus restoration can be improved. |
+| UI polish | Some legacy animations and image-failure states are incomplete. |
+| PWA | Deferred unless a future issue explicitly prioritizes install/offline update behavior. |
 
 ## After Each Merge
 
-Add a new entry with:
+Add a new entry at the top of the log with:
 
-- Date and branch merged.
-- Summary of implemented scope.
-- Tests and checks run.
-- Code review result.
-- Known follow-ups or risks.
-- Recommended next step.
-
----
-
-## 2026-06-16 — Phase 1: Scaffold Web App
-
-**Scope:**
-- Created `testownik-web/` as a Vite + Vue 3 + TypeScript SPA.
-- Configured strict TypeScript with `@tsconfig/strictest` and `@vue/tsconfig`.
-- Set up Vue Router 4 with hash history (landing, quiz, not-found routes).
-- Defined global CSS variables for dark, light, and legacy themes (matching legacy electron app).
-- Configured ESLint flat config with `typescript-eslint` and `eslint-plugin-vue`.
-- Configured Prettier.
-- Configured Vitest for unit tests (Node) and integration tests (jsdom).
-- Configured Playwright with chromium and mobile (Pixel 7) projects.
-- Added initial app entry, router, pages (LandingPage, QuizPage, NotFoundPage), and App.vue.
-- Added basic E2E test for landing page load.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors, 0 warnings)
-- `pnpm build` — static production build succeeds
-- `pnpm test:unit` — 1 test passes
-- `pnpm test:e2e` — 2 tests pass (chromium + mobile landing page load)
-
-**Code review result:** Pending (Phase 1 scaffold, no domain logic to review).
-
-**Known follow-ups:**
-- `@tsconfig/strictest` may be too aggressive for some future patterns; re-evaluate if needed.
-- Playwright webServer config may need tuning for CI (currently `reuseExistingServer: true`).
-- SCSS/Dart Sass not yet configured; CSS variables are sufficient for theme system.
-
-**Recommended next step:** Phase 3 — Persistence Layer (IndexedDB wrapper, repositories for quizzes, assets, sessions, settings, recent).
-
----
-
-## 2026-06-16 — Phase 2: Port Domain Logic
-
-**Scope:**
-- Created `quizTypes.ts` — all domain types (QuizPackage, QuizSession, Question, Answer, AppSettings, CompatibleSaveJson).
-- Ported `encoding.ts` — UTF-8 validator (`isUtf8`) from legacy `encodingDetector.js` plus built-in Windows-1250 decode table (no npm dependency).
-- Ported `parseQuestionFile.ts` — X (multiple-choice) and Y (select/placeholder) question parsers from legacy `questionsReader.js`, with `[img]...[/img]` extraction, blank line filtering, correct answer mask parsing.
-- Ported `quizEngine.ts` — answer checking (order-independent single, select matching), counter updates, reoccurrence logic (correct → decrement, wrong → increment+cap), learned question detection, completion check, progress computation, random question selection with injected RNG.
-- Ported `quizSession.ts` — new session creation (`createQuizSession`) and restore from compatible save.json (`restoreQuizSession`).
-- Ported `saveJsonCompat.ts` — compatible save.json serializer (omits questions), deserializer with error handling, and `formatDuration(ms)` replacing moment.js `HH:mm:ss`.
-- Relaxed ESLint from `strictTypeChecked` to `recommendedTypeChecked` for practical strictness.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 83 tests pass (19 parser, 25 engine, 13 encoding, 9 save JSON, 8 duration, 7 session, 2 version)
-- `pnpm build` — static production build succeeds
-
-**Code review result:** PASS WITH NOTES — 1 major (X content .trim() removal), 1 minor (Y image body test), both fixed before merge.
-
-**Known follow-ups:**
-- Y question with `[img]` + `{wybór N}` on same line loses placeholders (edge case, unlikely in real quizzes).
-- `formatDuration` embedded in `saveJsonCompat.ts` — could be extracted to own module.
-- `getLinkToImage` returns `''` instead of `undefined` for missing `[/img]` (intentional defensive improvement).
-
-**Recommended next step:** Phase 4 — Import Pipeline (folder picker, file input fallback, drag/drop, virtual file tree, fingerprinting, asset mapping).
-
----
-
-## 2026-06-16 — Phase 3: Persistence Layer
-
-**Scope:**
-- Implemented `db.ts` — IndexedDB wrapper with versioned schema (v1), transaction helper, `StorageError` for quota/blocked/upgrade errors, `openDB`/`closeDB` lifecycle.
-- Implemented `quizRepository.ts` — save/get/list/update/delete `QuizPackage` by ID, find by fingerprint, cascade delete (removes sessions + assets + recents).
-- Implemented `assetRepository.ts` — store/fetch/delete Blobs keyed by quizId + relativePath, with `getAll` for quiz index.
-- Implemented `sessionRepository.ts` — CRUD for `QuizSession`, get latest by quiz, atomic `completeSession`, cascade delete by quiz.
-- Implemented `settingsRepository.ts` — persist `AppSettings` with defaults (theme: dark, reoccurrencesOnStart: 2, maxReoccurrences: 10), partial merge on save.
-- Implemented `recentRepository.ts` — upsert recent entry, list ordered by lastOpenedAt desc, delete.
-- Added `jsdom` + `fake-indexeddb` for integration test environment.
-- Added `schemaVersion: 1` to `QuizSession` type.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 83 tests pass
-- `pnpm test:integration` — 29 tests pass (5 quiz, 4 settings, 4 recents, 7 session, 5 asset + 4 cascade)
-- `pnpm build` — static production build succeeds
-
-**Code review result:** PASS WITH NOTES — 3 items fixed before merge (atomic completeSession, .gitkeep cleanup, cascade test extension).
-
-**Known follow-ups:**
-- Asset records lack `schemaVersion` (minor — shape unlikely to change).
-- `getQuizByFingerprint` does linear O(n) scan (no fingerprint index).
-- `upgrade()` ignores `oldVersion` — migration hooks needed for future versions.
-
-**Recommended next step:** Phase 4 — Import Pipeline.
-
----
-
-## 2026-06-16 — Phase 4: Import Pipeline
-
-**Scope:**
-- Implemented `importedFileTree.ts` — Virtual file tree types (`VirtualFile`, `VirtualDirectory`) and utilities (`findFile`, `listAllFiles`, `listFilesByExtension`).
-- Implemented `fileSystemAccess.ts` — Chromium `showDirectoryPicker()` folder import with recursive directory reading, feature detection via `isFileSystemAccessSupported()`.
-- Implemented `fileInputFallback.ts` — `<input type="file" webkitdirectory>` fallback with `buildTreeFromFileList()` path normalization (backslash → forward slash).
-- Implemented `dragDrop.ts` — Drag/drop handler using `webkitGetAsEntry` FileSystemEntry API, feature detection.
-- Implemented `fingerprint.ts` — Stable djb2 hash fingerprint from sorted file names + content hashes of .txt files (pure domain logic).
-- Implemented `importPipeline.ts` — Full import orchestrator: decode .txt files (UTF-8/Windows-1250), parse questions, collect image asset Blobs, compute fingerprint, detect save.json.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 109 tests pass (+26 from Phase 3)
-- `pnpm test:integration` — 29 tests pass
-- `pnpm build` — static production build succeeds
-
-**Code review result:** PASS WITH NOTES — 2 major findings fixed pre-merge (dragDrop feature detection, image asset matching precision).
-
-**Known follow-ups:**
-- `fileSystemAccess.ts`, `fileInputFallback.ts`, `dragDrop.ts` have no unit tests (need browser mocks).
-- `ImportedAsset.mimeType` and `.size` are derivable from `.blob` — consider removing redundant fields.
-- Image ref matching doesn't have a test for subdirectory refs (`[img]subdir/photo.jpg[/img]`).
-
-**Recommended next step:** Phase 5 — Landing Page and Quiz Library (import UI, recent/library list, empty states, settings/info entry points).
-
----
-
-## 2026-06-16 — Phase 5: Landing Page And Quiz Library
-
-**Scope:**
-- Installed Pinia for Vue state management.
-- Created `settingsStore` — theme and reoccurrence settings with IndexedDB persistence, applies `data-theme` attribute on load.
-- Created `quizLibraryStore` — quiz library CRUD, import orchestration (fingerprint dedup), progress enrichment from session data.
-- Created shared components: `Modal` (Teleport, Escape key, mask click-to-close, `role=dialog`/`aria-modal`), `ProgressBar`.
-- Created `ImportArea` — drag/drop zone, FSAA button, file input fallback, mobile responsive.
-- Created `QuizCard` — quiz name, question count, progress bars (correct/learned), continue/start/delete actions.
-- Created modals: `SettingsModal` (theme radio, reoccurrence number inputs), `InfoModal` (version, author), `DeleteQuizModal` (confirmation).
-- Rewrote `LandingPage.vue` — header with settings/info buttons, import area, quiz list with cards, error banners, loading state, empty state, mobile layout (max-width 480px breakpoints).
-- Installed `@vue/test-utils` + `@pinia/testing` for component testing.
-- Added `vitest.components.config.ts` with jsdom environment.
-- Added `test:components` script to package.json.
-- Fixed double file-picker bug by exporting `buildTreeFromFileList` from `fileInputFallback.ts`.
-- Fixed Modal Escape key via document-level keydown listener with `watch`/`onScopeDispose` lifecycle.
-- Added `mode=continue|new` query param to differentiate quiz launching intent.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 109 tests pass
-- `pnpm test:components` — 15 tests pass (6 Modal, 9 QuizCard)
-- `pnpm test:integration` — 28 tests pass
-- `pnpm build` — production build succeeds
-- Total: 152 tests
-
-**Code review result:** PASS WITH FIXES — 2 blockers + 5 majors + 7 minors found, all blockers and majors fixed pre-merge (double file-picker, Escape key, continue/startNew differentiation, fingerprint dedup, unused prop).
-
-**Known follow-ups:**
-- Landing page has no E2E test beyond the basic load test from Phase 1.
-- `importViaFileInput` still available but unused by components — consider removal.
-- `ProgressBar.backgroundColor` prop removed (was unused) — re-add if needed later.
-- Modal focus trapping and focus restoration not implemented (carried over from Electron reference).
-- `upsertRecent` inside `markOpened` now awaited before navigation (fixes race condition).
-
-**Recommended next step:** Phase 6 — Quiz Page (question rendering, answer checking, stats sidebar, action button, modals, keyboard, mobile).
-
----
-
-## 2026-06-16 — Phase 6: Quiz Page
-
-**Scope:**
-- Created `quizSessionStore` — full quiz flow state: init (new/continue), question picking via `pickRandomQuestion`, answer checking via `checkSingleAnswer`/`checkSelectAnswer`, reoccurrence updates via `applyAnswerResult`, timer with setInterval, autosave to IndexedDB, finish detection, answer shuffle in state (not getter).
-- Created `useAssetUrls` composable — loads asset blobs from IndexedDB, creates/revokes object URLs, provides `getUrl(relativePath)` resolver.
-- Created `QuizQuestion.vue` — renders text/image question content, select placeholders with fill/correct/wrong styling, image fallback.
-- Created `SingleAnswerList.vue` — 2-column grid of answers with checkboxes, custom indicators, correct/wrong/missed reveal states with color-coded borders.
-- Created `StatsSidebar.vue` — progress bars (correct/learned ratio), numeric counts (correct/bad, learned/total), question count, formatted time, tag × reoccurrences, settings/info/exit action buttons.
-- Created `SelectOptionsModal.vue` — option picker for select-type questions, correct/wrong reveal highlighting.
-- Created `FinishQuizModal.vue` — final stats (time, correct, bad, learned) with return button.
-- Rewrote `QuizPage.vue` — full-height flex layout with main question area + sidebar, accept/next action button, keyboard handling (Space accept/next, 1-9 toggle, Escape close modals), mobile responsive at 768px, save/exit modal with progress prompt.
-- Fixed timer leak by stopping timer in `onUnmounted`.
-- Fixed continue mode not persisting newly created sessions.
-- Fixed select modal clickable during reveal phase.
-- Fixed Space key firing when modals are open.
-- Moved answer shuffle from computed getter to `pickNext()` action.
-- Refactored session creation with shared `createNewSession` helper.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 109 tests pass
-- `pnpm test:components` — 15 tests pass
-- `pnpm test:integration` — 28 tests pass
-- `pnpm build` — production build succeeds (QuizPage chunk: 18.88 KB)
-- Total: 152 tests
-
-**Code review result:** PASS WITH FIXES — 2 blockers + 6 majors + 8 minors found, all blockers and majors fixed pre-merge (timer leak, missing FinishQuizModal, missing session save, Math.random in getter, select click during reveal, Space key guard, numeric stats counts).
-
-**Known follow-ups:**
-- No component tests for quiz components (QuizQuestion, SingleAnswerList, StatsSidebar, SelectOptionsModal, FinishQuizModal) — E2E or component tests needed.
-- Keyboard handler depends on div focus — consider global `document.addEventListener` for keyboard shortcuts.
-- `imgFailed` in QuizQuestion is a computed always returning false — should be `ref`.
-- No CSS transition animations for question changes (Electron has fade transitions).
-- `formatDuration` still in `saveJsonCompat.ts` — should be extracted to `domain/duration.ts`.
-- Keyboard handler missing `Numpad1-9` and `Backquote` key codes.
-
-**Recommended next step:** Phase 8 — Static Hosting And Optional PWA.
-
----
-
-## 2026-06-16 — Phase 7: Autosave, Restore, And Export
-
-**Scope:**
-- Added periodic timer autosave (every 30s) + visibility change listener (save when tab hidden).
-- Added `exportSaveJson` action downloading `save.json` via Blob download (uses `platform/browser/download.ts`).
-- Added `matchAndImportSaveJson` action in quizLibrary store — parses `save.json`, matches reoccurrence tags to quiz question tags, creates new session, guards against overwriting active sessions, shows error banners on mismatch.
-- Added import save.json button in LandingPage (hidden file input, only visible when quizzes exist).
-- Fixed timer race condition: decoupled wall-clock tracking (`timerStartedAt`, `timerTick`, `flushTime`) from session mutations. Timer no longer writes to `session.time` — instead, elapsed time is computed via getter and flushed to session.time only on save/stop.
-- Fixed `saveAndExit` not awaiting save before navigation.
-- Fixed `saveSession` swallowing errors: now accepts `{ silent?: boolean }` — autosave calls use `{ silent: true }`, user-initiated saves log errors to console.
-- Extracted DOM APIs: `triggerDownload` to `platform/browser/download.ts`, `addVisibilityListener` to `platform/browser/visibility.ts`.
-- Fixed CSS: `position: relative` on `.landing__save-import` label.
-
-**Tests and checks run:**
-- `pnpm typecheck` — passes (0 errors)
-- `pnpm lint` — passes (0 errors)
-- `pnpm test:unit` — 109 tests pass
-- `pnpm test:components` — 15 tests pass
-- `pnpm test:integration` — 28 tests pass
-- `pnpm build` — production build succeeds
-- Total: 152 tests
-
-**Code review result:** PASS WITH FIXES — 4 majors + 4 minors found, all resolved pre-merge (silent save failures, un-awaited saveAndExit, timer race condition, DOM APIs in store, position relative, void return type, session overwrite guard).
-
-**Known follow-ups:**
-- No unit tests for `matchAndImportSaveJson` tag-matching logic.
-- Timer time accuracy limited to ~1s drift between ticks (cosmetic only).
-- Import save.json does not handle multiple quizzes with equal match scores (takes first best).
-- `flushTime()` called twice in `finishQuiz` path (once in `stopTimer`, once in `saveSession`) — second call is a no-op since `timerStartedAt` is already null.
-
-**Recommended next step:** Phase 9 — Migration Cutover.
-
----
-
-## 2026-06-16 — Phase 8: Static Hosting And Optional PWA
-
-**Scope:**
-- Added `.github/workflows/deploy.yml` — GitHub Pages deployment: check types, lint, run all 152 tests, build production, deploy to Pages.
-- Verified build output: `dist/` uses relative paths (`base: './'`), hash routing works for static hosting, no redirect rules needed.
-- Verified mobile viewport (375×812, mobile+touch emulation): landing page renders correctly, no layout issues, no console errors.
-- PWA evaluation: deferred. App already works offline for loaded content (IndexedDB + cached assets). Full offline-first PWA requires service worker + manifest, best done post-launch.
-- Bundle size: index chunk 49.85 KB gzipped, QuizPage 6.73 KB gzipped — well within static hosting budget.
-
-**Tests and checks run:**
-- `pnpm typecheck` — 0 errors
-- `pnpm lint` — 0 errors
-- `pnpm test:unit` — 109 tests pass
-- `pnpm test:integration` — 28 tests pass
-- `pnpm test:components` — 15 tests pass
-- `pnpm build` — production build succeeds
-- Mobile viewport emulation — no errors, correct layout
-- Total: 152 tests
-
-**Recommended next step:** (All phases complete.)
-
----
-
-## 2026-06-16 — Phase 9: Migration Cutover
-
-**Scope:**
-- Created `.ai/MIGRATION.md` — comprehensive migration guide covering quiz import, save.json import/export, browser storage model, Electron-to-web differences, and troubleshooting (storage quota, unsupported browsers, missing images, encoding issues, save.json import failures).
-- Electron app left untouched (read-only reference).
-- Final QA pass: all CI checks pass (typecheck, lint, unit/integration/component tests), build succeeds, mobile viewport verified. Manual QA checklist partially completed — quiz-intensive items require real historical quiz fixture files for manual verification, all flows verified programmatically through 152 tests.
-
-**Tests and checks run:**
-- `pnpm typecheck` — 0 errors
-- `pnpm lint` — 0 errors
-- `pnpm test:unit` — 109 tests pass
-- `pnpm test:integration` — 28 tests pass
-- `pnpm test:components` — 15 tests pass
-- `pnpm build` — production build succeeds
-- Total: 152 tests
-
-**Manual QA status:**
-
-| Check | Status |
-|-------|--------|
-| Import real historical quiz folder | NOT TESTED (no fixtures) |
-| Solve questions, refresh, continue | NOT TESTED (no fixtures) |
-| Finish quiz and start again | NOT TESTED (no fixtures) |
-| Import quiz with images | NOT TESTED (no fixtures) |
-| Import quiz with Windows-1250 text | NOT TESTED (no fixtures) |
-| Change settings and reload | NOT TESTED (no quiz in browser) |
-| Switch each theme | PASS |
-| Keyboard-only quiz flow | NOT TESTED (no quiz) |
-| Export progress and import back | NOT TESTED (no quiz) |
-| Delete quiz and confirm removal | NOT TESTED (no quiz) |
-| Test deployed static build | PASS |
-| Landing page at 360px mobile width | PASS (tested at 375px) |
-| Complete quiz flow with touch | NOT TESTED (no quiz) |
-| Mobile UI inspection (console errors, overflow) | PASS |
-
-**Known follow-ups:**
-- Manual QA items marked NOT TESTED need real historical quiz fixtures for end-to-end verification.
-- No Playwright E2E tests beyond the basic Phase 1 smoke test.
-- PWA not implemented (evaluated and deferred).
-
-**All 9 phases complete.**
-
----
-
-## 2026-06-16 — Phase 10: CI/CD And GitHub Pages Deployment Verification
-
-**Scope:**
-- Verified GitHub Pages deploy workflow passes end-to-end: typecheck → lint → unit tests (109) → integration tests (28) → component tests (15) → build → deploy.
-- Fixed CI blockers: pnpm v11 `allowBuilds: { esbuild: true }` in `pnpm-workspace.yaml`, unused `computed` import in `SingleAnswerList.vue`.
-- Verified deployed URL (`https://bberni.github.io/testownik-rewrite/`): page loads, hash routing works (`/#/quiz/test123` resolves), 0 console errors at both desktop (1280×720) and mobile (375×812) viewports.
-- CI regression guard confirmed: previous runs failed on typecheck/lint errors, preventing deployment.
-- Workflow uses `pnpm/action-setup` with `cache: pnpm` for fast dependency resolution.
-- Lockfile drift prevented by `--frozen-lockfile`.
-
-**Checks verified:**
-| Criterion | Status |
+| Field | Required content |
 |---|---|
-| CI green (all steps pass on push to main) | PASS |
-| Deploy succeeds (actions/deploy-pages completes) | PASS |
-| Hash routing works on deployed domain | PASS |
-| No console errors (desktop + mobile) | PASS |
-| CI blocks deploy on failure | PASS (verified by 4 failed runs) |
-| Mobile deploy (375px viewport) | PASS |
+| Date and branch | Merge date and branch name. |
+| Issues | GitHub issue numbers or direct task reference. |
+| Scope | What changed and why. |
+| Tests | Exact commands and manual checks run. |
+| Review | Subagent code review verdict and important notes. |
+| Deploy | GitHub Pages workflow and live-site verification when required. |
+| Follow-ups | Remaining risks, deferred work, or recommended next issue. |
 
-**Known follow-ups:**
-- Node.js 20 deprecation warning in CI — actions should be upgraded to v5 where available before September 2026.
-- No content-type sniffing override — GitHub Pages serves `.css`/`.js` assets with correct MIME types by default.
-- No custom 404 page (hash routing doesn't need one).
+Template:
 
-**All 10 phases complete.**
+```md
+## YYYY-MM-DD - <branch>
 
-(End of file)
+**Issues:** #<number>
+
+**Scope:**
+- <what changed>
+
+**Tests and checks:**
+- `<command>` - pass/fail
+- Manual: <browser/viewport/flow/result>
+
+**Code review:** <PASS/PASS WITH NOTES/NEEDS CHANGES/BLOCKED>
+
+**Deploy:** <not required / workflow run URL / live verification notes>
+
+**Follow-ups:**
+- <remaining risk or next step>
+```
+
+---
+
+## 2026-06-20 - fix/issue-19-answer-flash-key
+
+**Issues:** #19
+
+**Scope:**
+- Fixed correct-answer green flash on spacebar question transition in quiz flow.
+- Root cause: Vue reused DOM elements for answer `<label>` when `:key="answer.id"` overlapped between questions. Old `--correct` CSS class animated via 150ms transition.
+- Fix: composite key `\`${questionTag}-${answer.id}\`` prevents DOM reuse across questions.
+- Also reset `revealedCorrectIds` and `revealedSelectResults` in `pickNext()` (latent stale-data bug).
+
+**Tests and checks:**
+- `pnpm typecheck` — pass
+- `pnpm lint` — pass
+- `pnpm test:unit` — 109/109 pass
+- `pnpm test:integration` — 28/28 pass
+- `pnpm test:components` — 15/15 pass
+- `pnpm build` — pass
+- Manual: Chrome DevTools via Docker — imported 5-question fixture, transitioned through 3+ questions via spacebar, no leaked `--correct`/`--wrong`/`--missed` classes, fresh DOM elements per question, zero console errors
+
+**Code review:** PASS WITH NOTES — `revealedSelectResults` reset and `?? ''` fallback applied before merge.
+
+**Deploy:** Workflow #31 — success.
+
+**Follow-ups:**
+- No remaining risks from this fix.
+
+---
+
+## Baseline - Completed Rewrite
+
+The rewrite completed through CI/CD and GitHub Pages deployment verification. Historical phase-by-phase details remain available in git history. Future entries in this file should describe maintenance merges, not old rewrite phases.
